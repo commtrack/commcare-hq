@@ -1,0 +1,73 @@
+{% extends "layout-split-2.html" %}
+{% load reporters-tags %}
+{% load pagination-tags %}
+{% load testers_tags %}
+{% load region-tags %}
+
+{% block title %}{% if point %}Edit {{ point }}{% else %}Add a Sampling Point{% endif %}{% endblock %}
+
+{% block right %}
+<div class="module">
+	<h2>{% if point %}Edit - {{ point }}{% else %}Add a Sampling Point{% endif %}</h2>
+
+	<form method="post" id="fm-point-add" action="/samplingpoints/{% if point %}{{ point.pk }}{% else %}add{% endif %}">
+		<div>
+			<label for="fm-point-add-name">Name</label>
+			<input type="text" class="required" id="fm-point-add-name" name="name"{% if point %} value="{{ point.name }}"{% endif %} />
+			<p class="help">This is a sampling point name.</p>
+		</div>
+		<div>
+			<div>
+                                <label for="fm-point-add-code" class="suffix">Code</label>
+				<input type="text" id="fm-point-add-code" name="code"{% if point %} value="{{ point.code }}"{% endif %} />
+				
+                                <p class="help">A sampling point unique code.</p>
+			</div>
+                </div>
+                <div>
+                    <label>Coordinates</label>
+			<div>
+				<input type="text" id="fm-point-add-latitude" name="latitude"{% if point %} value="{{ point.latitude }}"{% endif %} />
+				<label for="fm-point-add-last_name" class="suffix">Latitude</span></label>
+			</div>
+			<div>
+				<input type="text" id="fm-point-add-longitude" name="longitude"{% if point %} value="{{ point.longitude }}"{% endif %} />
+				<label for="fm-point-add-chw_id" class="suffix">Longitude</label>
+                        </div>
+                </div>
+            <br>
+                <div>
+			<div>
+                                <input type="text" id="fm-point-add-wqmarea" name="wqmarea"{% if point.wqmarea %} value="{{ point.wqmarea }}"{% endif %} />
+                                <label for="fm-point-add-chw_username" class="suffix">Wqm Area</label>
+                                <p class="help">An area the sampling point belongs to.</p>
+			</div>
+		</div>
+
+
+		<div class="submit">
+			<input type="submit" value="{% if point %}Save Changes{% else %}Add Sampling Point{% endif %}" />{% if point %}
+			<input type="submit" name="delete" value="Delete {{ point }}" />{% endif %}
+		</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+	$(function() {
+
+		/* make the connection(s) div (above) clonable, so
+		 * more than one connection can be added at once */
+		var id ="#fm-rep-add-connections";
+		$(id + " > div").cloneable("connection", true);
+		$(id + " > label").text("Connection(s)");{% if all_groups %}
+
+		/* groups are also clonable */
+		var id ="#fm-rep-add-groups";
+		$(id + " > div").cloneable("groups", true);
+		$(id + " > label").text("Group(s)");{% endif %}
+
+		/* validate the form on submit */
+		$("#fm-rep-add").rs_validate();
+	});
+</script>
+{% endblock %}
