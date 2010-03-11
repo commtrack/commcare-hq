@@ -1,0 +1,30 @@
+{% extends "hq/base.html" %}
+{% load i18n %}
+{% load samples_tags %}
+
+{% block title %}{% trans "Samples" %}{% endblock %}
+{% block javascripts %}
+    <script type="text/javascript" src="{{MEDIA_URL}}/graphing/flot/jquery.js"></script>
+    <script type="text/javascript" src="{{MEDIA_URL}}/graphing/flot/jquery.flot.js"></script>
+    <script type="text/javascript" src="{{MEDIA_URL}}/aquatest/js/selector.js"></script>
+{% endblock %}
+
+{% block org_content %}
+<h2>Samples</h2>
+<br>
+<p>
+    {% trans "Show Samples for:" %}
+    <!--need a js to interact the selection-->
+    <select id="selectDistrict" name="districts" onchange="" >
+            <option>All districts</option>
+            {% for district in districts %}
+            <!--put value to point to the actual html file-->
+            <option value="{{ district.id }}">{{ district.name }}</option>
+            {% endfor %}
+    </select>
+</p>
+
+
+{% get_samples user %}
+
+{% endblock %}
