@@ -1,21 +1,27 @@
+import datetime
 from django.db import models
+from locations.models import Location
 
-class WqmAuthority(models.Model):
-    name = models.CharField(max_length=50)
-    modified = models.DateTimeField()
-    created = models.DateTimeField()
+
+# TODO:  make the modified fields accept blank and null
+# so as to accept adding without a modified date.
+
+class WqmAuthority(Location):
+    modified = models.DateTimeField(blank=True,null=True)
+    created = models.DateTimeField(default=datetime.datetime.now())
 
     def __unicode__(self):
         return self.name
 
-class WqmArea(models.Model):
-    name = models.CharField(max_length=50)
+class WqmArea(Location):
     wqmauthority = models.ForeignKey(WqmAuthority)
-    modified = models.DateTimeField()
-    craeted = models.DateTimeField()
+    modified = models.DateTimeField(blank=True,null=True)
+    craeted = models.DateTimeField(default=datetime.datetime.now())
 
     def __unicode__(self):
         return self.name
 
-
-
+class SamplingPoint(Location):
+    wqmarea = models.ForeignKey(WqmArea)
+    modified = models.DateTimeField(blank=True,null=True)
+    craeted = models.DateTimeField(default=datetime.datetime.now())
