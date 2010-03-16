@@ -1,6 +1,6 @@
 {% extends "hq/base.html" %}
 {% load i18n %}
-{% load testers_tags %}
+{% load wqm-tags %}
 {% load pagination-tags %}
 
 {% block title %}{% trans "Sample Points" %}{% endblock %}
@@ -48,8 +48,8 @@
                 <tbody>{% if points.object_list %}{% for point in points.object_list %}
 			<tr>
                                 <td>{% if point.name %}{{ point.name }}{% else %} <span class="unknown">Unknown</span>{% endif %}</td>
-                                <td>{% if point.area %}{{ point.area }}{% else %} <span class="unknown">Unknown</span>{% endif %}</td>
-				<td>{% if point.area.wqmauthority %}{{ point.area.wqmauthority }}{% else %}<span class="na">None</span>{% endif %}</td>
+                                <td>{% if point.wqmarea %}{{ point.wqmarea }}{% else %} <span class="unknown">Unknown</span>{% endif %}</td>
+				<td>{% if point.wqmarea.wqmauthority %}{{ point.wqmarea.wqmauthority }}{% else %}<span class="na">None</span>{% endif %}</td>
                                 {% get_points_with_counts point %}
                                 <td>
                                     <a href="/samplingpoints/{{ point.pk }}">Edit</a> |
