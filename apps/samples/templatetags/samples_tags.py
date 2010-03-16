@@ -21,7 +21,7 @@ from graphing.models import RawGraph
 
 import time
 
-from samples.models import Sample
+from samples.models import *
 from wqm.models import *
 
 xmldate_format= '%Y-%m-%dT%H:%M:%S'
@@ -72,21 +72,28 @@ def get_samples(user):
 
     ret += '<tbody>'
     count = 1
-    for sample in samples:
-        ret += '\n<tr class="%s">' % _get_class(count)
-        count += 1
-        point = sample.sampling_point
-        ret += '<td>%s (%s)</td>' % (point, point.area)
-        ret += '<td>%s</td>' % (sample.taken_by)
+    if samples:
+        for sample in samples:
+            ret += '\n<tr class="%s">' % _get_class(count)
+            count += 1
+            point = sample.sampling_point
+            ret += '<td>%s (%s)</td>' % (point, point.wqmarea)
+            ret += '<td>%s</td>' % (sample.taken_by)
 
-        
-        ret += '<td>%s</td>' % (sample.date_taken)
-        ret += '<td>%s</td>' % (sample.date_received)
 
-        # TODO: Get the results for the sample and
-        # present it in a gud way.
-        ret += '<td>%s</td>' % ('results') 
-        ret += '</tr>'
+            ret += '<td>%s</td>' % (sample.date_taken)
+            ret += '<td>%s</td>' % (sample.date_received)
 
+            # TODO: Get the results for the sample and
+            # present it in a gud way.
+            results = MeasuredValue.objects.filter(sample=sample)
+            if results:
+                for result in results:
+                    ret += '<td>%s %s</td>' % (result.parameter.test_name_short, result.value,)
+            else:
+                ret += '<td>%s</td>' % ('results')
+            ret += '</tr>'
+    else:
+        ret += '<td>No samples submitted</td>'
     ret += '</tbody></table>'
     return ret
