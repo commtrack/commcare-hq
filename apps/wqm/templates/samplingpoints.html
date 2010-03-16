@@ -27,21 +27,24 @@
                 <div>
                     <label>Coordinates</label>
 			<div>
-				<input type="text" id="fm-point-add-latitude" name="latitude"{% if point %} value="{{ point.latitude }}"{% endif %} />
+				<input type="text" id="fm-point-add-latitude" name="latitude"{% if point %}{% if point.latitude%} value="{{ point.latitude }}"{% endif %}{% endif %} />
 				<label for="fm-point-add-last_name" class="suffix">Latitude</span></label>
 			</div>
 			<div>
-				<input type="text" id="fm-point-add-longitude" name="longitude"{% if point %} value="{{ point.longitude }}"{% endif %} />
+				<input type="text" id="fm-point-add-longitude" name="longitude"{% if point %}{% if point.longitude %} value="{{ point.longitude }}"{% endif %}{% endif %} />
 				<label for="fm-point-add-chw_id" class="suffix">Longitude</label>
                         </div>
                 </div>
             <br>
                 <div>
+
+                        <label>Wqm Area</label>{% if areas %}
 			<div>
-                                <input type="text" id="fm-point-add-wqmarea" name="wqmarea"{% if point.wqmarea %} value="{{ point.wqmarea }}"{% endif %} />
-                                <label for="fm-point-add-chw_username" class="suffix">Wqm Area</label>
-                                <p class="help">An area the sampling point belongs to.</p>
-			</div>
+				<select name="wqmarea">
+					<option></option>{% for area in areas %}
+					<option value="{{ area.pk }}" class="depth-{{ area.depth }}"{% if point %}{% ifequal area point.wqmarea %} selected="selected"{% endifequal %}{% endif %}>{{ area.name }}</option>{% endfor %}
+				</select>
+			</div>{% endif %}
 		</div>
 
 
@@ -52,22 +55,4 @@
 	</form>
 </div>
 
-<script type="text/javascript">
-	$(function() {
-
-		/* make the connection(s) div (above) clonable, so
-		 * more than one connection can be added at once */
-		var id ="#fm-rep-add-connections";
-		$(id + " > div").cloneable("connection", true);
-		$(id + " > label").text("Connection(s)");{% if all_groups %}
-
-		/* groups are also clonable */
-		var id ="#fm-rep-add-groups";
-		$(id + " > div").cloneable("groups", true);
-		$(id + " > label").text("Group(s)");{% endif %}
-
-		/* validate the form on submit */
-		$("#fm-rep-add").rs_validate();
-	});
-</script>
 {% endblock %}
