@@ -1,4 +1,4 @@
-from wqm.models import WqmAuthority,WqmArea
+from wqm.models import WqmAuthority,WqmArea,SamplingPoint
 from django.contrib import admin
 from hq.models import *
 from resources.models import *
@@ -13,4 +13,8 @@ admin.site.register(WqmAuthority, WqmAuthorityAdmin)
 class WqmAreaAdmin(admin.ModelAdmin):
     list_display = ('name', 'wqmauthority', 'modified', 'craeted')
 admin.site.register(WqmArea, WqmAreaAdmin)
+
+class SamplingPointAdmin(admin.ModelAdmin):
+    list_display = ('name', 'wqmarea', 'modified', 'craeted')
+admin.site.register(SamplingPoint, SamplingPointAdmin)
 
