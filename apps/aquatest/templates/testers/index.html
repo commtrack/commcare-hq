@@ -40,7 +40,7 @@
                                 <td><a href="/testers/{{ reporter.pk }}"{% if reporter.last_name %}>{{ reporter.first_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
 				<td>{% if reporter.connection %}{{ reporter.connection }}{% else %}<span class="na">None</span>{% endif %}</td>
 				<!--<td>{{ reporter.last_seen }}</td>-->
-                                {% get_tester_with_counts reporter %}
+                                {% get_counts_for_tester reporter %}
                                 <td>
                                     <a href="/testers/{{ reporter.pk }}">Edit</a> |
                                     <a href="/testers/{{ reporter.pk }}/delete">Delete</a>
