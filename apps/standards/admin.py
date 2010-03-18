@@ -13,6 +13,6 @@ class WaterUseTypeAdmin(admin.ModelAdmin):
 admin.site.register(WaterUseType, WaterUseTypeAdmin)
 
 class StandardAdmin(admin.ModelAdmin):
-    list_display = ('name','govering_body','date_effective','modified','created','water_use_type')
+    list_display = ('name','govering_body','date_effective','modified','created')
 admin.site.register(Standard, StandardAdmin)
 
