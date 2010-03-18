@@ -15,7 +15,6 @@ class Standard(models.Model):
     date_effective = models.DateField()
     modified = models.DateTimeField(blank=True, null=True)
     created = models.DateTimeField()
-    water_use_type = models.ForeignKey(WaterUseType)
 
     def __unicode__(self):
         return self.name
