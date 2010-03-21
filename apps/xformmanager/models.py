@@ -230,7 +230,7 @@ class FormDefModel(models.Model):
           (not including repeats)'''
         return len(self._get_cursor().description)
     
-        
+    
     def get_row(self, id):
         '''Get a row, by ID.'''
         list = self.get_rows([['id','=',id]])
@@ -241,6 +241,11 @@ class FormDefModel(models.Model):
         else:
             raise Exception("Multiple values for id %s found in form %s" % (id, self ))
         
+    
+    def row_as_dict(self, id):
+        """Get a row as a dictionary, with the column names as keys"""
+        return dict(zip(self.get_column_names(), self.get_row(id)))
+    
     def get_rows(self, column_filters=[], sort_column="id", sort_descending=True,
                  blacklist=[]):
         '''Get rows associated with this form's schema.
