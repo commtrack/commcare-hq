@@ -5,7 +5,7 @@ from django.db import models, connection
 from django.utils.translation import ugettext_lazy as _
 
 from xformmanager.models import FormDefModel
-from hq.models import Domain
+from domain.models import Domain
 from hq.dbutil import get_column_names
 
 
@@ -407,6 +407,7 @@ FORM_TYPE = (
     ('open', 'Open'),
     ('close', 'Close'),
     ('follow', 'Follow'),
+    ('referral', 'Referral'),
 )
 
 class CaseFormIdentifier(models.Model):

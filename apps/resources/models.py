@@ -1,6 +1,9 @@
 import datetime
+
 from django.db import models
-from hq.models import Domain, ExtUser
+from django.contrib.auth.models import User
+
+from domain.models import Domain
 from locations.models import Location
 
 
@@ -64,7 +67,7 @@ class Resource(models.Model):
 
 class TrackResource(models.Model):
     resource = models.ForeignKey(Resource)
-    user = models.ForeignKey(ExtUser)
+    user = models.ForeignKey(User)
     date_tracked = models.DateTimeField(default=datetime.datetime.now())
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     description = models.TextField(null=True, blank=True)
@@ -73,7 +76,7 @@ class TrackResource(models.Model):
         return '%s : %s' % (self.resource, self.date_tracked)
 
 class ResourceSupplyRequest(models.Model):
-    user = models.ForeignKey(ExtUser)
+    user = models.ForeignKey(User)
     resource = models.ForeignKey(Resource)
     request_date = models.DateTimeField(default=datetime.datetime.now())
     request_remarks = models.TextField(null=True, blank=True)

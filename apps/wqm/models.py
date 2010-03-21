@@ -6,22 +6,28 @@ from locations.models import Location
 # TODO:  make the modified fields accept blank and null
 # so as to accept adding without a modified date.
 
-class WqmAuthority(Location):
+class WqmLocation(Location):
+    """
+    For this module, we add a created and modified date to 
+    our locations.
+    """ 
     modified = models.DateTimeField(blank=True,null=True)
     created = models.DateTimeField(default=datetime.datetime.now())
 
+class WqmAuthority(WqmLocation):
+    """E.g. a district"""
+    
     def __unicode__(self):
         return self.name
 
-class WqmArea(Location):
+class WqmArea(WqmLocation):
     wqmauthority = models.ForeignKey(WqmAuthority)
-    modified = models.DateTimeField(blank=True,null=True)
-    craeted = models.DateTimeField(default=datetime.datetime.now())
-
+    
     def __unicode__(self):
         return self.name
 
-class SamplingPoint(Location):
+class SamplingPoint(WqmLocation):
     wqmarea = models.ForeignKey(WqmArea)
-    modified = models.DateTimeField(blank=True,null=True)
-    craeted = models.DateTimeField(default=datetime.datetime.now())
+
+    def __unicode__(self):
+        return self.name
