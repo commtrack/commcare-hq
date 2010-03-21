@@ -28,10 +28,10 @@ use_curl = True
 #filename = r'C:\Source\hq\commcare-hq\apps\backups\tests\data\backup.xml'
 #filename = r"C:\Documents and Settings\Cory Zue\Desktop\reg.xml"
 #filename = r'C:\Source\hq\commcare-hq\tests\deployment\multipart\multipart-3.txt'
-#filename = r'C:\Source\hq\commcare-hq\tests\deployment\multipart\multipart-1.post'
-filename = os.path.join(os.getcwd(), 'test-data', 'multipart-1.post')
+filename = r'/media/Otoro/projects/AquaTest/data/attachments/aqua.xml'
+#filename = os.path.join(os.getcwd(), 'test-data', 'multipart-1.post')
 
-domain_name = "BRAC"
+domain_name = "itido"
 #content_type = "text/xml"
 content_type = "multipart/form-data; boundary=newdivider"
 
