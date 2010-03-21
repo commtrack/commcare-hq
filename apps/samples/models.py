@@ -1,12 +1,19 @@
-from django.db import models
-from locations.models import Location
 from datetime import datetime
+
+from django.db import models
+from django.db.models.signals import post_save
+
+from locations.models import Location
 from standards.models import Standard, WaterUseType
 from reporters.models import Reporter
 from wqm.models import SamplingPoint
-from datetime import datetime
+from xformmanager.models import Metadata
+
 
 # Create your Django models here, if you need them.
+H2S_XMLNS = "http://www.aquatest-za.org/h2s"
+PHYSCHEM_XMLNS = "http://www.aquatest-za.org/physchem"
+SAMPLE_XMLNS = [H2S_XMLNS, PHYSCHEM_XMLNS]
 
 class Parameter(models.Model):
     test_name = models.CharField(max_length=120)
@@ -40,7 +47,7 @@ class Sample(models.Model):
     taken_by = models.ForeignKey(Reporter)
     sampling_point = models.ForeignKey(SamplingPoint)
     notes = models.TextField(null=True, blank=True)
-    measured_values = models.ForeignKey(MeasuredValue)
+    measured_values = models.ForeignKey(MeasuredValue, null=True, blank=True) # TODO: don't allow null!!!
     date_taken = models.DateTimeField()
     date_received = models.DateTimeField()
     created = models.DateTimeField()
@@ -91,3 +98,43 @@ class AbnormalRange(models.Model):
     def __unicode__(self):
         return '%d - %d' % (self.minimum, self.maximum)
     
+    
+
+def check_and_add_sample(sender, instance, created, **kwargs): #get sender, instance, created
+    # only process newly created forms, not all of them
+    if not created:             return
+    
+    # check the form type to see if it is a new sample
+    form_xmlns = instance.formdefmodel.target_namespace
+    
+    if form_xmlns in SAMPLE_XMLNS:
+        # it is an xmlns we care about, so make a new sample
+        sample_data = instance.formdefmodel.row_as_dict(instance.raw_data)
+                
+        now = datetime.now()
+        # start with measured value
+        val = MeasuredValue()
+        val.parameter = Parameter.objects.all()[0]
+        val.value = sample_data["h2s_test_testresults_h2s"]
+        val.modified = now
+        val.created = now
+        val.save()
+        
+        sample = Sample()
+        # sample.taken_by = None # TODO: look up reporter from     
+        sample.taken_by = Reporter.objects.get(id = 1)
+        sample.sampling_point = SamplingPoint.objects.all()[0]
+        sample.notes = sample_data["h2s_test_datacapture_comments"]
+        sample.measured_values = val
+        sample.date_taken = sample_data["h2s_test_assessment_assessmentdate"]
+        sample.date_received = instance.attachment.submission.submit_time
+        sample.created = now
+        sample.modified = now
+        # TODO: save when all fields are filled in
+        sample.save()
+        
+    
+    
+
+# Register to receive signals each time a Metadata is saved
+post_save.connect(check_and_add_sample, sender=Metadata)
