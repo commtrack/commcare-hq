@@ -8,7 +8,7 @@ from hq.utils import get_dates_reports
 
 from hq.models import Domain, Organization, ReporterProfile
 from apps.reports.models import Case, CaseFormIdentifier
-from shared import get_data_by_chw
+from shared import get_data_by_chw, only_follow, referral_late
 
 def chw_summary(request, domain=None):
     '''The chw_summary report'''
@@ -24,49 +24,70 @@ def chw_summary(request, domain=None):
                   depends on have been uploaded.'''
     
     data_by_chw = get_data_by_chw(case)
-    all_data=get_active_open_by_chw(data_by_chw, active, enddate)
+    all_data = {}
+    all_data['domain'] = domain.id
+    all_data['enddate'] = str(enddate.month) + "/" + str(enddate.day) + "/" +\
+         str(enddate.year)
+    all_data['startdate_active'] = str(active.month) + "/" + str(active.day) +\
+        "/" + str(active.year)
+    all_data['data'] = get_active_open_by_chw(data_by_chw, active, enddate)
     return render_to_string("custom/all/chw_summary.html", 
                             {
                              "all_data": all_data})
 
 def get_active_open_by_chw(data_by_chw, active, enddate):
-    all_data = []
+    data = []
     for chw_id, chw_data in data_by_chw.items():
-        count_of_open = 0
-        count_of_active = 0
-        count_last_week = 0
-        days_late_list = []
-        chw_name = ""
-        for id, map in chw_data.items():
-            (chw_name, form_type_to_date, last_week) = \
-                get_form_type_to_date(map, enddate)
-            count_last_week += last_week
-            # if the most recent open form was submitted more recently than  
-            # the most recent close form then this case is open
-            if form_type_to_date['open'] > form_type_to_date['close'] or \
-                only_follow(form_type_to_date):
-                count_of_open += 1
-                if datetime.date(form_type_to_date['open']) >= active or \
-                    datetime.date(form_type_to_date['follow']) >= active:
-                    count_of_active += 1
+        counts = get_counts(chw_data, active, enddate, 0, 0, 0, 0, 0, [], '')
+        
+        percentage = get_percentage(counts['open'], counts['active'])
+        if percentage >= 90: over_ninety = True
+        else: over_ninety = False
+        avg_late = get_avg_late(counts['days_late']) 
+        data.append({'chw': chw_id, 'chw_name': counts['chw_name'], 'active':
+                    counts['active'], 'open': counts['open'], 'percentage':
+                    percentage, 'last_week': counts['last_week'], 'avg_late': 
+                    avg_late, 'over_ninety': over_ninety, 'reg_late': 
+                    counts['reg_late'], 'ref_late': counts['ref_late']})
+    return data
+
+def get_counts(chw_data, active, enddate, num_open, num_active, num_last_week,
+               num_ref_late, num_reg_late, days_late_list, chw_name):
+    ''' Gets the counts of different status cases and other information
+    about this chw'''
+    for id, map in chw_data.items():
+        (chw_name, form_type_to_date, last_week) = \
+            get_form_type_to_date(map, enddate)
+        num_last_week += last_week
+        # if the most recent open form was submitted more recently than  
+        # the most recent close form then this case is open
+        if form_type_to_date['open'] > form_type_to_date['close'] or \
+            only_follow(form_type_to_date):
+            num_open += 1
+            if datetime.date(form_type_to_date['open']) >= active or \
+                datetime.date(form_type_to_date['follow']) >= active:
+                if referral_late(form_type_to_date, enddate, 3):
+                    num_ref_late += 1
+                else:
+                    num_active += 1
+            else:
+                if referral_late(form_type_to_date, enddate, 3):
+                    num_ref_late += 1
                 else:
                     days_late = get_days_late(form_type_to_date, active)
                     days_late_list.append(days_late)
-        percentage = get_percentage(count_of_open, count_of_active)
-        avg_late = get_avg_late(days_late_list)
-        data_to_display = {'chw': chw_id, 'chw_name': chw_name, 'active': 
-                           count_of_active, 'open': count_of_open, 
-                           'percentage': percentage, 'last_week': 
-                           count_last_week, 'avg_late': avg_late}
-        all_data.append(data_to_display.copy()) 
-    return all_data
+                    num_reg_late += 1
+    return {'active': num_active, 'open': num_open, 'last_week': num_last_week,
+            'reg_late': num_reg_late, 'ref_late': num_ref_late, 'days_late':
+            days_late_list, 'chw_name': chw_name}
 
 def get_form_type_to_date(map, enddate):
     ''' Gives the chw name and for each form type, the date of the most 
     recently submitted form'''
     mindate = datetime(2000, 1, 1)
     last_week = 0
-    form_type_to_date = {'open': mindate, 'close': mindate, 'follow': mindate}
+    form_type_to_date = {'open': mindate, 'close': mindate, 'follow': mindate,
+                         'referral': mindate}
     for form_id, form_info in map.items():
         cfi = CaseFormIdentifier.objects.get(form_identifier=form_id.id)
         form_type = cfi.form_type
@@ -110,11 +131,3 @@ def get_percentage(count_of_open, count_of_active):
         return (count_of_active * 100)/count_of_open
     else:
         return 0
-    
-def only_follow(fttd):
-    ''' for cases where there was no open form but there was a follow form'''
-    mindate = datetime(2000, 1, 1)
-    if fttd['open'] == mindate and fttd['follow'] > mindate:
-        return True
-    else:
-        return False
