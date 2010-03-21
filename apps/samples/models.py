@@ -133,8 +133,5 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
         # TODO: save when all fields are filled in
         sample.save()
         
-    
-    
-
 # Register to receive signals each time a Metadata is saved
 post_save.connect(check_and_add_sample, sender=Metadata)
