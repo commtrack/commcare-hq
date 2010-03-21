@@ -123,7 +123,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
         sample = Sample()
         # sample.taken_by = None # TODO: look up reporter from     
         sample.taken_by = Reporter.objects.get(id = 1)
-        sample.sampling_point = SamplingPoint.objects.all()[0]
+        sample.sampling_point = SamplingPoint.objects.all()[0] # get the point from a point code
         sample.notes = sample_data["h2s_test_datacapture_comments"]
         sample.measured_values = val
         sample.date_taken = sample_data["h2s_test_assessment_assessmentdate"]
