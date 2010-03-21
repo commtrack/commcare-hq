@@ -38,7 +38,7 @@ import hq.reporter.metastats as metastats
 
 import hq.reporter.inspector as repinspector
 import hq.reporter.metadata as metadata
-from hq.decorators import extuser_required
+from domain.decorators import login_and_domain_required
 
 from reporters.utils import *
 from reporters.views import message, check_reporter_form, update_reporter
@@ -59,7 +59,7 @@ def message(req, msg, link=None):
             "link": link
     })
 
-@extuser_required()
+@login_and_domain_required
 def index(req):
     return render_to_response(req,
         "index.html", {
@@ -68,7 +68,7 @@ def index(req):
     })
 
 @require_http_methods(["GET", "POST"])
-@extuser_required()
+@login_and_domain_required
 def edit_samplingpoints(req, pk):
     point = get_object_or_404(SamplingPoint, pk=pk)
 
@@ -179,7 +179,7 @@ def check_point_form(req):
         "exists": exists }
 
 @require_http_methods(["GET", "POST"])
-@extuser_required()
+@login_and_domain_required
 def add_samplingpoint(req):
 
     def get(req):
@@ -256,7 +256,7 @@ def add_samplingpoint(req):
     elif req.method == "POST": return post(req)
 
 @require_http_methods(["GET", "POST"])
-@extuser_required()
+@login_and_domain_required
 def delete_samplingpoints(req, pk):
     point = get_object_or_404(SamplingPoint, pk=pk)
     point.delete()

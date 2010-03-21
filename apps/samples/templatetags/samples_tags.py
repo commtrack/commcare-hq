@@ -33,8 +33,7 @@ output_format = '%Y-%m-%d %H:%M'
 def get_tester(user):
     # todo: get the testers in the system with the same
     # domain as the login user.
-    extuser = ExtUser.objects.get(id=user.id)
-    rep_profile = ReporterProfile.objects.filter(domain=extuser.domain)
+    rep_profile = ReporterProfile.objects.filter(domain=user.selected_domain)
     reporters = []
 
     if rep_profile:

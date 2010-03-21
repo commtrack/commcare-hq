@@ -26,6 +26,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from rapidsms.webui.utils import render_to_response, paginated
 
+from domain.decorators import login_and_domain_required
 from xformmanager.models import *
 from hq.models import *
 from graphing.models import *
@@ -38,7 +39,6 @@ import hq.reporter.metastats as metastats
 
 import hq.reporter.inspector as repinspector
 import hq.reporter.metadata as metadata
-from hq.decorators import extuser_required
 
 from reporters.utils import *
 from reporters.views import message, check_reporter_form, update_reporter
@@ -61,7 +61,7 @@ def message(req, msg, link=None):
 def get_tester(current_user):
     # todo: get the testers in the system with the same
     # domain as the login user.
-    rep_profile = ReporterProfile.objects.filter(domain=current_user.domain)
+    rep_profile = ReporterProfile.objects.filter(domain=current_user.selected_domain)
     reporters = []
 
     if rep_profile:
@@ -70,10 +70,9 @@ def get_tester(current_user):
             reporters.append(reporter)
     return reporters
 
-@extuser_required()
+@login_and_domain_required
 def index(req):
-    cur_user = ExtUser.objects.get(id=req.user.id)
-    reporters = get_tester(cur_user)
+    reporters = get_tester(req.user)
     return render_to_response(req,
         "testers/index.html", {
         "reporters": paginated(req, reporters, prefix="rep"),
@@ -103,7 +102,7 @@ def check_reporter_form(req):
         "exists": exists }
 
 @require_http_methods(["GET", "POST"])
-@extuser_required()
+@login_and_domain_required
 def add_testers(req):
     # NOTE/TODO:
     # this is largely a copy paste job from rapidsms/apps/reporters/views.py
@@ -120,8 +119,7 @@ def add_testers(req):
                     PersistantConnection,
                     pk=req.GET["connection"]))
 
-        cur_user = ExtUser.objects.get(id=req.user.id)
-        reporters = get_tester(cur_user)
+        reporters = get_tester(req.user)
         return render_to_response(req,
             "testers/testers.html", {
 
@@ -187,7 +185,7 @@ def add_testers(req):
 
 
 @require_http_methods(["GET", "POST"])
-@extuser_required()
+@login_and_domain_required
 def edit_testers(req, pk):
     rep = get_object_or_404(Reporter, pk=pk)
     rep_profile = get_object_or_404(ReporterProfile, reporter=rep)
@@ -272,7 +270,7 @@ def edit_testers(req, pk):
     elif req.method == "POST": return post(req)
 
 @require_http_methods(["GET", "POST"])
-@extuser_required()
+@login_and_domain_required
 def delete_testers(req, pk):
     rep = get_object_or_404(Reporter, pk=pk)
     rep_profile = get_object_or_404(ReporterProfile, reporter=rep)
@@ -294,11 +292,7 @@ def update_reporterprofile(req, rep, chw_id, chw_username):
                                   guid = str(uuid.uuid1()).replace('-',''))
         # reporters created through the webui automatically have the same
         # domain and organization as the creator
-        extuser = req.extuser
-        profile.domain = extuser.domain
-        if extuser.organization == None:
-            profile.organization = Organization.objects.filter(domain=extuser.domain)[0]
-        else: profile.organization = extuser.organization
+        profile.domain = req.user.selected_domain
     profile.chw_id = chw_id
     profile.chw_username = chw_username
     profile.save()
@@ -316,7 +310,7 @@ def check_profile_form(req):
     chw_id = req.POST.get("chw_id", "")
     if chw_id:
         # if chw_id is set, it must be unique for a given domain
-        rps = ReporterProfile.objects.filter(chw_id=req.POST.get("chw_id", ""), domain=req.extuser.domain)
+        rps = ReporterProfile.objects.filter(chw_id=req.POST.get("chw_id", ""), domain=req.user.selected_domain)
         if rps: errors['exists'] = ["chw_id"]
     return errors
 

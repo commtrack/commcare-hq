@@ -40,8 +40,8 @@ import hq.reporter.metastats as metastats
 
 import hq.reporter.inspector as repinspector
 import hq.reporter.metadata as metadata
-from hq.decorators import extuser_required
 
+from domain.decorators import login_and_domain_required
 from reporters.utils import *
 from reporters.views import message, check_reporter_form, update_reporter
 from reporters.models import Reporter, PersistantBackend, PersistantConnection
@@ -51,7 +51,7 @@ from wqm.models import WqmAuthority
 logger_set = False
 
 
-@extuser_required()
+@login_and_domain_required
 def samples(request):
     template_name = 'samples.html'
     context = {}
