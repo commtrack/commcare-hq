@@ -36,7 +36,9 @@ here its easier to live to just change the ui to create the feelin of tester-->
 				<input type="text" id="fm-rep-add-chw_username" name="chw_username"{% if reporter.chw_username %} value="{{ reporter.chw_username }}"{% endif %} />
 				<label for="fm-rep-add-chw_username" class="suffix">Username</label>
 			</div>
-		</div>{% if all_backends %}
+
+
+                </div>{% if all_backends %}
 
 		<div id="fm-rep-add-connections">
 			<label>Primary Connection</label>{% if connections %}{% for connection in connections %}
@@ -56,7 +58,7 @@ here its easier to live to just change the ui to create the feelin of tester-->
 				<input type="text" name="conn-identity" />
 			</div>{% endif %}
 		</div>{% endif %}
-
+                
 		<div id="fm-rep-add-groups">
 			<label>Primary Group</label>{% if all_groups %}{% if groups %}{% for group in groups %}
 			<div>

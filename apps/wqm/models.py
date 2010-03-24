@@ -27,6 +27,7 @@ class WqmArea(WqmLocation):
         return self.name
 
 class SamplingPoint(WqmLocation):
+    """ The point the tests are done """
     wqmarea = models.ForeignKey(WqmArea)
 
     def __unicode__(self):

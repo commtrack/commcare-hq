@@ -25,7 +25,11 @@ def __unicode__(self):
 def send_sms_notifications(sender, instance, created, **kwargs): #get sender, instance, created
     # TODO: Lookup the reporters based on the sample point and 
     # figure out who to send to, what to send
-    thread = Thread(target=_send_sms,args=(1, "Test message from AquaTest!"))
+    # print sender.notes
+    reporter = instance.taken_by
+    msg = "A test message from AquaTest!"
+    # msg = str(instance.notes)
+    thread = Thread(target=_send_sms,args=(reporter.id, msg ))
     thread.start()
 
 def _send_sms(reporter_id, message_text):     

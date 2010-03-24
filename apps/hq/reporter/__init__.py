@@ -10,8 +10,9 @@ from datetime import timedelta
 import logging
 import settings
 import hq.utils as utils
-from hq.reporter import agents        
+from hq.reporter import agents
 from hq.reporter import metadata
+    
 import inspector as repinspector
 
 from reports.util import get_custom_report_module, get_report_method

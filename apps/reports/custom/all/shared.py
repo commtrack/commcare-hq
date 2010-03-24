@@ -1,5 +1,5 @@
 from datetime import datetime
-from apps.reports.models import CaseFormIdentifier
+from reports.models import CaseFormIdentifier
     
 def get_data_by_chw(case):
     ''' Given a case return the data organized by chw id'''

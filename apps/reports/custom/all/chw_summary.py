@@ -8,7 +8,7 @@ from hq.utils import get_dates_reports
 
 from domain.models import Domain
 from hq.models import Organization, ReporterProfile
-from apps.reports.models import Case, CaseFormIdentifier
+from reports.models import Case, CaseFormIdentifier
 from shared import get_data_by_chw, only_follow, referral_late
 
 def chw_summary(request, domain=None):
