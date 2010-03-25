@@ -1,0 +1,28 @@
+{% extends "layout-split-2.html" %}
+{% load pagination-tags %}
+{% load region-tags %}
+
+<!--Reporter and ReporterProfile will make up a tester and tie him to a domain
+here its easier to live to just change the ui to create the feelin of tester-->
+
+{% block right %}
+<div class="module">
+	<h2>{% if notifications %}Edit - for  {{ notifications.authorised_sampler }}{% else %}Add a SMS Notification{% endif %}</h2>
+
+	<form method="post" id="fm-notifications-add" action="/notifications/{% if notification %}{{ notification.pk }}{% else %}add{% endif %}">
+		<div>
+			<label for="fm-point-add-name">Point Name</label>
+			<input type="text" class="required" id="fm-point-add-name" name="name"{% if point %} value="{{ point.name }}"{% endif %} />
+			<p class="help">This is a sampling point name.</p>
+		</div>
+		
+
+
+		<div class="submit">
+			<input type="submit" value="{% if point %}Save Changes{% else %}Add Sampling Point{% endif %}" />{% if point %}
+			<input type="submit" name="delete" value="Delete {{ point }}" />{% endif %}
+		</div>
+	</form>
+</div>
+
+{% endblock %}

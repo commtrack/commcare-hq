@@ -9,11 +9,16 @@ from samples.models import Sample
 from reporters.models import Reporter
 from wqm.models import SamplingPoint
 
+NOTIFICATION_TYPE_CHOICES = (
+    (u'all', u'All'),
+    (u'http://www.aquatest-za.org/h2s', u'h2s'),
+    (u'http://www.aquatest-za.org/physchem', u'physchem'),
+)
 
 class SmsNotification(models.Model):
     sampling_point = models.ForeignKey(SamplingPoint)
     authorised_sampler = models.ForeignKey(Reporter)
-    notification_type = models.CharField(max_length=160)
+    notification_type = models.CharField(max_length=160, choices=NOTIFICATION_TYPE_CHOICES)
     digest = models.BooleanField()
     modified = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(default=datetime.now())
@@ -40,7 +45,6 @@ def send_sms_notifications(sender, instance, created, **kwargs): #get sender, in
     notices = SmsNotification.objects.filter(sampling_point = point)
     for notice in notices:
         reporter = notice.authorised_sampler
-        print "sending sms >>>>>>>>>>> %s" % reporter
         # TODO: generate a sms according the the authorised tester.
         # this is temp sms to authorised sampler
         msg = "Aquatest: authorised tester is notified"
