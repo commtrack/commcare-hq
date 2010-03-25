@@ -13,7 +13,7 @@ from wqm.models import SamplingPoint
 class SmsNotification(models.Model):
     sampling_point = models.ForeignKey(SamplingPoint)
     authorised_sampler = models.ForeignKey(Reporter)
-    notification_type = models.CharField(max_length=50)
+    notification_type = models.CharField(max_length=160)
     digest = models.BooleanField()
     modified = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(default=datetime.now())
@@ -27,10 +27,25 @@ def send_sms_notifications(sender, instance, created, **kwargs): #get sender, in
     # figure out who to send to, what to send
     # print sender.notes
     reporter = instance.taken_by
-    msg = "A test message from AquaTest!"
-    # msg = str(instance.notes)
+    point = instance.sampling_point
+
+    # A temporary SMS Response
+    # TODO: Auto generate response SMS.
+    msg = "Aquatest: Sample data have been submitted."
+    # sending an sms to a submitter.
     thread = Thread(target=_send_sms,args=(reporter.id, msg ))
     thread.start()
+
+    # figure out who to send sms to in the notifation table.
+    notices = SmsNotification.objects.filter(sampling_point = point)
+    for notice in notices:
+        reporter = notice.authorised_sampler
+        print "sending sms >>>>>>>>>>> %s" % reporter
+        # TODO: generate a sms according the the authorised tester.
+        # this is temp sms to authorised sampler
+        msg = "Aquatest: authorised tester is notified"
+        thread = Thread(target=_send_sms,args=(reporter.id, msg ))
+        thread.start()
 
 def _send_sms(reporter_id, message_text):     
     data = {"uid":  reporter_id,

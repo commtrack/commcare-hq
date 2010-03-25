@@ -48,6 +48,7 @@ def get_dashboard_user_counts(domain, startdate=None, enddate=None, use_blacklis
             # don't do anything if we can't find a username column
             username_col = fdef.get_username_column()
             if not username_col:
+                # Allen -- to remove the warning on the dashboard.
                 logging.warning("No username column found in %s, will not display dashboard data." % fdef)
                 ret += '<p style="font-weight:bold; color:orange;">Warning: no username column found in %s, no dashboard data will be displayed for this form</p>' % fdef
                 continue

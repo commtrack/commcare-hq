@@ -1,10 +1,8 @@
 import datetime
 from django.db import models
+
 from locations.models import Location
 
-
-# TODO:  make the modified fields accept blank and null
-# so as to accept adding without a modified date.
 
 class WqmLocation(Location):
     """

@@ -29,6 +29,7 @@ use_curl = False
 #filename = r"C:\Documents and Settings\Cory Zue\Desktop\reg.xml"
 #filename = r'C:\Source\hq\commcare-hq\tests\deployment\multipart\multipart-3.txt'
 filename = r'/media/Otoro/projects/AquaTest/data/attachments/aqua2.xml'
+#filename = r'/media/Otoro/projects/AquaTest/data/attachments/phychem.xml'
 #filename = os.path.join(os.getcwd(), 'test-data', 'multipart-1.post')
 
 domain_name = "itido"
