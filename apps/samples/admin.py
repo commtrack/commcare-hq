@@ -9,17 +9,33 @@ class MeasuredValueInline(admin.TabularInline):
 
 class SampleAdmin(admin.ModelAdmin):
     list_display = ('taken_by','sampling_point','notes')
+    search_fields = ('taken_by','sampling_point','notes')
+    list_filter = ['taken_by','sampling_point']
     inlines = [MeasuredValueInline]
 admin.site.register(Sample, SampleAdmin)
 #admin.site.register(Sample)
 
-#class ParameterAdmin(admin.ModelAdmin):
-#    list_display = ('test_name','unit','lookup_hint','test_name_short')
-#    search_fields = ('test_name','unit','lookup_hint','test_name_short')
-#admin.site.register(Parameter, ParameterAdmin)
-admin.site.register(Parameter)
+class ParameterAdmin(admin.ModelAdmin):
+    list_display = ('test_name','unit','lookup_hint','test_name_short')
+    search_fields = ('test_name','unit','lookup_hint','test_name_short')
+    list_filter = ['test_name']
+admin.site.register(Parameter, ParameterAdmin)
+#admin.site.register(Parameter)
 
-#admin.site.register(MeasuredValue)
-admin.site.register(ValueRule)
-admin.site.register(NormalRange)
-admin.site.register(AbnormalRange)
+class ValueRuleAdmin(admin.ModelAdmin):
+    list_display = ('description','parameter','standard','water_use_type')
+    list_filter = ['standard']
+    search_fields = ('description','parameter','standard','water_use_type')
+admin.site.register(ValueRule,ValueRuleAdmin)
+
+class NormalRangeAdmin(admin.ModelAdmin):
+    list_display = ('description','value_rule','minimum','maximum')
+#    list_filter = []
+    search_fields = ('description','value_rule')
+admin.site.register(NormalRange,NormalRangeAdmin)
+
+class AbnormalRangeAdmin(admin.ModelAdmin):
+    list_display = ('description','value_rule','remedialaction','color','minimum','maximum')
+#    list_filter = ['']
+    search_fields = ('description','value_rule','remedialaction','color','minimum','maximum')
+admin.site.register(AbnormalRange,AbnormalRangeAdmin)
