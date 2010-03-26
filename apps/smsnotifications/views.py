@@ -46,8 +46,8 @@ from reporters.utils import *
 from reporters.views import message, check_reporter_form, update_reporter
 from reporters.models import Reporter, PersistantBackend, PersistantConnection
 from locations.models import Location, LocationType
-from wqm.models import WqmAuthority
-from smsnotifications.models import SmsNotification
+from wqm.models import WqmAuthority, SamplingPoint
+from smsnotifications.models import SmsNotification, NotificationChoice
 
 logger_set = False
 
@@ -57,11 +57,13 @@ def index(request):
     template_name = 'sindex.html'
 
     notifications = SmsNotification.objects.all()
+    points = SamplingPoint.objects.all()
     districts = WqmAuthority.objects.all()
 
     return render_to_response(request,
         template_name, {
         "notifications": paginated(request, notifications, prefix="smsnotice"),
+        "points" : points,
         "districts":    districts,
     })
 
@@ -76,10 +78,15 @@ def add_notifications(req):
         template_name = "sms-notifications.html"
         notifications = SmsNotification.objects.all()
         districts = WqmAuthority.objects.all()
+        points = SamplingPoint.objects.all()
+        testers = get_tester(req.user)
         return render_to_response(req,
                 template_name, {
                 "notifications": paginated(req, notifications, prefix="smsnotice"),
-                "districts":    districts,
+                "points" : points,
+                "districts" : districts,
+                "testers" : testers,
+                "notification_types_choices" : NotificationChoice.objects.all(),
             })
 
     @transaction.commit_manually
@@ -167,3 +174,14 @@ def comma(string_or_list):
         list = string_or_list
         return ", ".join(list)
 
+def get_tester(current_user):
+    # todo: get the testers in the system with the same
+    # domain as the login user.
+    rep_profile = ReporterProfile.objects.filter(domain=current_user.selected_domain)
+    reporters = []
+
+    if rep_profile:
+        for rep in rep_profile:
+            reporter = rep.reporter
+            reporters.append(reporter)
+    return reporters

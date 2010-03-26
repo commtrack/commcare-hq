@@ -22,4 +22,7 @@ admin.site.register(Parameter)
 #admin.site.register(MeasuredValue)
 admin.site.register(ValueRule)
 admin.site.register(NormalRange)
-admin.site.register(AbnormalRange)
+
+class AbnormalRangeAdmin(admin.ModelAdmin):
+    fields = ['maximum', 'minimum', 'value_rule','description','color','remedialaction','created','modified']
+admin.site.register(AbnormalRange, AbnormalRangeAdmin)

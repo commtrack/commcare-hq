@@ -11,11 +11,33 @@ here its easier to live to just change the ui to create the feelin of tester-->
 
 	<form method="post" id="fm-notifications-add" action="/notifications/{% if notification %}{{ notification.pk }}{% else %}add{% endif %}">
 		<div>
-			<label for="fm-point-add-name">Point Name</label>
-			<input type="text" class="required" id="fm-point-add-name" name="name"{% if point %} value="{{ point.name }}"{% endif %} />
+			<label for="fm-point-add-point">Point Name</label>
+			<select name="point">
+                                <option></option>{% for point in points %}
+                                <option value="{{ point.pk }}" class="depth-{{ point.depth }}"{% if point %}{% ifequal point notifications.sampling_point %} selected="selected"{% endifequal %}{% endif %}>{{ point.name }}</option>{% endfor %}
+			</select>
 			<p class="help">This is a sampling point name.</p>
 		</div>
-		
+		<div>
+			<label for="fm-point-add-authorised_tester">Authorised Tester</label>
+			<select name="authorised_tester">
+                                <option></option>{% for tester in testers %}
+                                <option value="{{ tester.pk }}" class="depth-{{ tester.depth }}"{% if tester %}{% ifequal tester notifications.authorised_sampler %} selected="selected"{% endifequal %}{% endif %}>{{ tester.full_name }}</option>{% endfor %}
+			</select>
+			<p class="help">This is a Authorised sampler.</p>
+		</div>
+                <div>
+			<label for="fm-point-add-notification_type">Notification Type</label>
+			<select name="notification_type">
+                                <option></option>{% for choice in notification_types_choices %}
+                                <option value="{{ choice.pk }}" class="depth-{{ choice.depth }}"{% if choice %}{% ifequal choice notifications.notification_type %} selected="selected"{% endifequal %}{% endif %}>{{ choice }}</option>{% endfor %}
+                         </select>
+			<p class="help">This is a Notification type</p>
+		</div>
+		<div>
+			<label for="fm-point-add-digest">Digest</label>
+                        <input type="checkbox" name="digest" {% if notifications.digest %}checked="checked"{% endif %}/>
+		</div>
 
 
 		<div class="submit">
