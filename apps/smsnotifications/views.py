@@ -113,15 +113,26 @@ def add_notifications(req):
         try:
             # create the notification object from the form
             notification = SmsNotification()
-            rep = Reporter.objects.get(name = req.POST.get("name",""))
+
+            rep = Reporter.objects.get(pk = req.POST.get("authorised_sampler",""))
             notification.authorised_sampler = rep
 
+            choice = NotificationChoice.objects.get(pk = req.POST.get("notification_type",""))
+            notification.notification_type = choice
+
+            point = SamplingPoint.objects.get(pk = req.POST.get("sampling_point",""))
+            notification.sampling_point = point
+
+            notification.digest = req.POST.get("digest","")
+
+            
             # save the changes to the db
+            notification.save()
             transaction.commit()
 
             # full-page notification
             return message(req,
-                "SMS notification %d added" % (notification.pk),
+                "SMS notification %s added" % (notification.pk),
                 link="/smsnotification")
 
         except Exception, err:
@@ -135,12 +146,89 @@ def add_notifications(req):
 
 
 @login_and_domain_required
-def edit_notifications(request):
-    pass
+def edit_notifications(req, pk):
+    notification = get_object_or_404(SmsNotification, pk=pk)
+
+    def get(req):
+        template_name = "sms-notifications.html"
+        notifications = SmsNotification.objects.all()
+        districts = WqmAuthority.objects.all()
+        points = SamplingPoint.objects.all()
+        testers = get_tester(req.user)
+        return render_to_response(req,
+            template_name, {
+                # display paginated sampling points
+                "notifications": paginated(req, notifications, prefix="smsnotice"),
+                "points" : points,
+                "districts" : districts,
+                "testers" : testers,
+                "notification_types_choices" : NotificationChoice.objects.all(),
+                "notification" : notification,
+                })
+
+    @transaction.commit_manually
+    def post(req):
+        # check the form for errors
+        notice_errors = check_notice_form(req)
+
+        # if any fields were missing, abort.
+        missing = notice_errors["missing"]
+        exists = notice_errors["exists"]
+
+        if missing:
+            transaction.rollback()
+            return message(req,
+                "Missing Field(s): %s" % comma(missing),
+                link="/smsnotification/add")
+        # if authorised tester with same notification and point exists, abort.
+#        if exists:
+#            transaction.rollback()
+#            return message(req,
+#                "%s already exist" % comma(exists),
+#                link="/smsnotification/add")
+
+        try:
+            # create the notification object from the form
+            rep = Reporter.objects.get(pk = req.POST.get("authorised_sampler",""))
+            notification.authorised_sampler = rep
+
+            choice = NotificationChoice.objects.get(pk = req.POST.get("notification_type",""))
+            notification.notification_type = choice
+
+            point = SamplingPoint.objects.get(pk = req.POST.get("sampling_point",""))
+            notification.sampling_point = point
+
+            notification.digest = req.POST.get("digest","")
+
+
+            # save the changes to the db
+            notification.save()
+            transaction.commit()
+
+            # full-page notification
+            return message(req,
+                "SMS notification %s updated" % (notification.pk),
+                link="/smsnotification")
+
+        except Exception, err:
+            transaction.rollback()
+            raise
+
+    # invoke the correct function...
+    # this should be abstracted away
+    if   req.method == "GET":  return get(req)
+    elif req.method == "POST": return post(req)
 
 @login_and_domain_required
-def delete_notifications(request):
-    pass
+def delete_notifications(req, pk):
+    notification = get_object_or_404(SmsNotification, pk=pk)
+    notification.delete()
+
+    transaction.commit()
+    id = int(pk)
+    return message(req,
+        "SMS Notification %d deleted" % (id),
+        link="/smsnotification")
 
 def check_notice_form(req):
 
@@ -151,6 +239,12 @@ def check_notice_form(req):
         for field in SmsNotification._meta.fields
         if req.POST.get(field.name, "") == ""
            and field.blank == False]
+
+    # simple hack to removed a created date in the missing field
+    # it's not null but auto-created.
+    if 'created' in missing:
+        index = missing.index('created')
+        del missing[index]
 
     exists = []
     point = req.POST.get("sampling_point","")

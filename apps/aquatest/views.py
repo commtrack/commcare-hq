@@ -164,7 +164,7 @@ def add_testers(req):
             update_reporter(req, rep)
             # create reporter profile
             update_reporterprofile(req, rep, req.POST.get("chw_id", ""), \
-                                   req.POST.get("chw_username", ""))
+                                   req.POST.get("alias", ""))
             # save the changes to the db
             transaction.commit()
 

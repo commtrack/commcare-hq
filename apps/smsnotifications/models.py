@@ -8,7 +8,7 @@ from django.db.models.signals import post_save
 from samples.models import Sample
 from reporters.models import Reporter
 from wqm.models import SamplingPoint
-from xformmanager.models import ElementDefModel
+from xformmanager.models import FormDefModel
 
 # TODO: auto-create a notication choices as the xform is added to a domain.
 # link the notification type to the xform
@@ -26,9 +26,10 @@ class NotificationChoice(models.Model):
 
 def _add_choice(sender, instance, created, **kwargs): #get sender, instance, created
     # TODO: add a domain filter.
+    # if not created: return
     choice = NotificationChoice()
     try:
-        choice.choice = instance.xpath
+        choice.choice = instance.form_display_name
         choice.save()
     except Exception, e:
         # TODO: report error.
@@ -94,4 +95,4 @@ post_save.connect(send_sms_notifications, sender=Sample)
 
 # register to receive signals each time an xform is saved.
 # TODO: add signal on delete too.
-post_save.connect(_add_choice, sender=ElementDefModel)
+# post_save.connect(_add_choice, sender=FormDefModel)
