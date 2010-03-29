@@ -168,51 +168,61 @@ def edit_notifications(req, pk):
 
     @transaction.commit_manually
     def post(req):
-        # check the form for errors
-        notice_errors = check_notice_form(req)
+        # delete notification if a delete button was pressed.
+        if req.POST.get("delete", ""):
+            pk = notification.pk
+            notification.delete()
 
-        # if any fields were missing, abort.
-        missing = notice_errors["missing"]
-        exists = notice_errors["exists"]
-
-        if missing:
-            transaction.rollback()
-            return message(req,
-                "Missing Field(s): %s" % comma(missing),
-                link="/smsnotification/add")
-        # if authorised tester with same notification and point exists, abort.
-#        if exists:
-#            transaction.rollback()
-#            return message(req,
-#                "%s already exist" % comma(exists),
-#                link="/smsnotification/add")
-
-        try:
-            # create the notification object from the form
-            rep = Reporter.objects.get(pk = req.POST.get("authorised_sampler",""))
-            notification.authorised_sampler = rep
-
-            choice = NotificationChoice.objects.get(pk = req.POST.get("notification_type",""))
-            notification.notification_type = choice
-
-            point = SamplingPoint.objects.get(pk = req.POST.get("sampling_point",""))
-            notification.sampling_point = point
-
-            notification.digest = req.POST.get("digest","")
-
-
-            # save the changes to the db
-            notification.save()
             transaction.commit()
-
-            # full-page notification
             return message(req,
-                "SMS notification %s updated" % (notification.pk),
+                "Notification %d deleted" % (pk),
                 link="/smsnotification")
+        else:
+            # check the form for errors
+            notice_errors = check_notice_form(req)
 
-        except Exception, err:
-            transaction.rollback()
-            raise
+            # if any fields were missing, abort.
+            missing = notice_errors["missing"]
+            exists = notice_errors["exists"]
+
+            if missing:
+                transaction.rollback()
+                return message(req,
+                    "Missing Field(s): %s" % comma(missing),
+                    link="/smsnotification/add")
+            # if authorised tester with same notification and point exists, abort.
+    #        if exists:
+    #            transaction.rollback()
+    #            return message(req,
+    #                "%s already exist" % comma(exists),
+    #                link="/smsnotification/add")
+
+            try:
+                # create the notification object from the form
+                rep = Reporter.objects.get(pk = req.POST.get("authorised_sampler",""))
+                notification.authorised_sampler = rep
+
+                choice = NotificationChoice.objects.get(pk = req.POST.get("notification_type",""))
+                notification.notification_type = choice
+
+                point = SamplingPoint.objects.get(pk = req.POST.get("sampling_point",""))
+                notification.sampling_point = point
+
+                notification.digest = req.POST.get("digest","")
+
+
+                # save the changes to the db
+                notification.save()
+                transaction.commit()
+
+                # full-page notification
+                return message(req,
+                    "SMS notification %s updated" % (notification.pk),
+                    link="/smsnotification")
+
+            except Exception, err:
+                transaction.rollback()
+                raise
 
     # invoke the correct function...
     # this should be abstracted away
