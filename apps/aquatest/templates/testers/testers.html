@@ -21,7 +21,7 @@ here its easier to live to just change the ui to create the feelin of tester-->
         <!--<div>-->
         <div class="span-5 clear">
             <div style="float:right;">
-                <label for="fm-rep-add-alias">Username</label>
+                <label for="fm-rep-add-alias">Username (Alias)</label>
             </div>
         </div>
         <div class="span-2">
@@ -49,7 +49,7 @@ here its easier to live to just change the ui to create the feelin of tester-->
                 <input type="text" id="fm-rep-add-last_name" name="last_name"{% if reporter %} value="{{ reporter.last_name }}"{% endif %} />     
         </div>
         <!--<div>-->
-        <div class="span-5 clear">
+<!--        <div class="span-5 clear">
             <div style="float:right;">
                 <label for="fm-rep-add-chw_id" class="suffix">ID</label>
             </div>
@@ -57,7 +57,7 @@ here its easier to live to just change the ui to create the feelin of tester-->
         <div class="span-2">
                 <input type="text" id="fm-rep-add-chw_id" name="chw_id"{% if reporter.chw_id %} value="{{ reporter.chw_id }}"{% endif %} />
                 
-        </div>
+        </div>-->
         <!--<div>-->
         <!--Removed a the chw_username and join the alias with the username-->
         <!--<div class="span-5 clear">
@@ -104,6 +104,14 @@ here its easier to live to just change the ui to create the feelin of tester-->
         {% endif %}
 <!--</div>-->{% endif %}
 
+        <div class="span-5 clear">
+            <div style="float:right;">
+                <label for="fm-rep-add-e_mail">E-Mail</label>
+            </div>
+        </div>
+        <div class="span-2">
+                <input type="text" class="required" id="fm-rep-add-e_mail" name="e_mail"{% if reporter %} value="{{ reporter.e_mail }}"{% endif %} />
+        </div>
 
         <div class="span-5 clear">
             <div style="float:right;">

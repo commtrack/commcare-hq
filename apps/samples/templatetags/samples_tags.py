@@ -79,7 +79,6 @@ def get_samples(user):
             ret += '<td>%s (%s)</td>' % (point, point.wqmarea)
             ret += '<td>%s</td>' % (sample.taken_by)
 
-
             ret += '<td>%s</td>' % (sample.date_taken)
             ret += '<td>%s</td>' % (sample.date_received)
 
@@ -87,10 +86,12 @@ def get_samples(user):
             # present it in a gud way.
             results = MeasuredValue.objects.filter(sample=sample)
             if results:
+                ret += '<td>'
                 for result in results:
-                    ret += '<td>%s %s</td>' % (result.parameter.test_name_short, result.value,)
+                    ret += '%s %s, ' % (result.value, result.parameter.test_name_short)
+                ret += '</td>'
             else:
-                ret += '<td>%s</td>' % ('results')
+                ret += '<td>%s</td>' % ('No parameter for this submited sample')
             ret += '</tr>'
     else:
         ret += '<td>No samples submitted</td>'

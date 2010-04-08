@@ -103,7 +103,7 @@ class AbnormalRange(Range):
     
 def check_and_add_sample(sender, instance, created, **kwargs): #get sender, instance, created
     # only process newly created forms, not all of them
-    # if not created:             return
+    if not created:             return
     
     # check the form type to see if it is a new sample
     form_xmlns = instance.formdefmodel.target_namespace

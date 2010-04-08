@@ -32,7 +32,10 @@ class ReporterProfile(models.Model):
     
     #dmyung - we will probably need to get rid of this unless there's a really compelling reason
     organization = models.ForeignKey("Organization", null=True, blank=True) 
-    
+
+    # an optional email field to the reporter ( tester)
+    e_mail = models.EmailField(null=True, blank=True)
+
     # todo: eventually make these non-null.
     guid = models.CharField(max_length=32, null=True, blank=True)
     approved = models.BooleanField(default=False)

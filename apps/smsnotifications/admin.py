@@ -1,4 +1,4 @@
-from smsnotifications.models import SmsNotification
+from smsnotifications.models import SmsNotification, NotificationChoice
 from django.contrib import admin
 from hq.models import *
 
@@ -8,4 +8,6 @@ class SmsNotificationAdmin(admin.ModelAdmin):
     list_filter = ['sampling_point', 'authorised_sampler', 'notification_type']
 admin.site.register(SmsNotification,SmsNotificationAdmin)
 
-
+class NotificationChoiceAdmin(admin.ModelAdmin):
+    list_display = ('choice', 'xform')
+admin.site.register(NotificationChoice,NotificationChoiceAdmin)

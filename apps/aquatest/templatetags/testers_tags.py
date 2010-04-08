@@ -53,6 +53,7 @@ def get_counts_for_tester(reporter):
 
     return ret
 
+@register.simple_tag
 def _get_class(count):
     if count % 2 == 0:
         return "even"

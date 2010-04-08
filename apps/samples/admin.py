@@ -10,8 +10,16 @@ class SampleAdmin(admin.ModelAdmin):
     search_fields = ('taken_by','sampling_point','notes')
     list_filter = ['taken_by','sampling_point']
     inlines = [MeasuredValueInline]
+    fieldsets = (
+        (None, {
+            'fields' : ('taken_by','sampling_point','notes')
+        }),
+        (None, {
+            'fields' : ('date_taken', 'date_received', 'modified', 'created'),
+            'classes': ['wide', 'extrapretty',],
+        }),
+    )
 admin.site.register(Sample, SampleAdmin)
-#admin.site.register(Sample)
 
 class ParameterAdmin(admin.ModelAdmin):
     list_display = ('test_name','unit','lookup_hint','test_name_short')

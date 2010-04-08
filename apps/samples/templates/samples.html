@@ -16,7 +16,7 @@
     {% trans "Show Samples for:" %}
     <!--need a js to interact the selection-->
     <select id="selectDistrict" name="districts" onchange="" >
-            <option>All districts</option>
+            <option>-----------</option>
             {% for district in districts %}
             <!--put value to point to the actual html file-->
             <option value="{{ district.id }}">{{ district.name }}</option>

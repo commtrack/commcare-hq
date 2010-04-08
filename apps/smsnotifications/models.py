@@ -12,29 +12,36 @@ from xformmanager.models import FormDefModel
 
 # TODO: auto-create a notication choices as the xform is added to a domain.
 # link the notification type to the xform
-NOTIFICATION_TYPE_CHOICES = (
-    (u'all', u'All'),
-    (u'http://www.aquatest-za.org/h2s', u'h2s'),
-    (u'http://www.aquatest-za.org/physchem', u'physchem'),
-)
+#NOTIFICATION_TYPE_CHOICES = (
+#    (u'all', u'All'),
+#    (u'http://www.aquatest-za.org/h2s', u'h2s'),
+#    (u'http://www.aquatest-za.org/physchem', u'physchem'),
+#)
 
 class NotificationChoice(models.Model):
     choice = models.CharField(max_length=255)
+    xform = models.ForeignKey(FormDefModel)
 
     def __unicode__(self):
         return self.choice
 
-def _add_choice(sender, instance, created, **kwargs): #get sender, instance, created
-    # TODO: add a domain filter.
-    # if not created: return
-    choice = NotificationChoice()
-    try:
-        choice.choice = instance.form_display_name
-        choice.save()
-    except Exception, e:
-        # TODO: report error.
-        raise
-
+#def _add_choice(sender, instance, created, **kwargs): #get sender, instance, created
+#    # TODO: add a domain filter.
+#    if not created:     return
+#    print '<<<<<<<<<<<<<<<<<< ADDING CHOICE >>>>>>>>>>>>>>>>>>>>>'
+#    xchoice = NotificationChoice()
+#    try:
+#        print '<<<<<<<<<<<<<<<<<< TRY 1 >>>>>>>>>>>>>>>>>>>>>'
+#        xchoice.choice = instance.form_display_name
+#        print '<<<<<<<<<<<<<<<<<< TRY 2 >>>>>>>>>>>>>>>>>>>>>'
+#        xchoice.xform = instance
+#        print '<<<<<<<<<<<<<<<<<< TRY 3 >>>>>>>>>>>>>>>>>>>>>'
+#    except Exception, e:
+#        # TODO: report error.
+#        print '<<<<<<<<<<<<<<<<<< error >>>>>>>>>>>>>>>>>>>>>'
+#        raise
+#    xchoice.save()
+#    print '<<<<<<<<<<<<<<<<<< TRY 4 >>>>>>>>>>>>>>>>>>>>>'
 
 class SmsNotification(models.Model):
     sampling_point = models.ForeignKey(SamplingPoint)
@@ -70,7 +77,7 @@ def send_sms_notifications(sender, instance, created, **kwargs): #get sender, in
         reporter = notice.authorised_sampler
         # TODO: generate a sms according the the authorised tester.
         # this is temp sms to authorised sampler
-        msg = "Aquatest: authorised tester is notified"
+        msg = "Aquatest: Sample is submited from %s %s " % (instance.sampling_point.wqmarea, instance.sampling_point )
         thread = Thread(target=_send_sms,args=(reporter.id, msg ))
         thread.start()
 
@@ -95,4 +102,4 @@ post_save.connect(send_sms_notifications, sender=Sample)
 
 # register to receive signals each time an xform is saved.
 # TODO: add signal on delete too.
-# post_save.connect(_add_choice, sender=FormDefModel)
+#post_save.connect(_add_choice, sender=FormDefModel)

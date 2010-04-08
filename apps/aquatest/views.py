@@ -164,7 +164,8 @@ def add_testers(req):
             update_reporter(req, rep)
             # create reporter profile
             update_reporterprofile(req, rep, req.POST.get("chw_id", ""), \
-                                   req.POST.get("alias", ""))
+                                   req.POST.get("alias", ""), \
+                                   req.POST.get("e_mail", ""))
             # save the changes to the db
             transaction.commit()
 
@@ -191,6 +192,7 @@ def edit_testers(req, pk):
     rep_profile = get_object_or_404(ReporterProfile, reporter=rep)
     rep.chw_id = rep_profile.chw_id
     rep.chw_username = rep_profile.chw_username
+    rep.e_mail = rep_profile.e_mail
 
     def get(req):
         return render_to_response(req,
@@ -249,7 +251,8 @@ def edit_testers(req, pk):
                 update_reporter(req, rep)
                 # update reporter profile
                 update_reporterprofile(req, rep, req.POST.get("chw_id", ""), \
-                                       req.POST.get("chw_username", ""))
+                                       req.POST.get("chw_username", ""), \
+                                       req.POST.get("e_mail", ""))
 
                 # no exceptions, so no problems
                 # commit everything to the db
@@ -284,7 +287,7 @@ def delete_testers(req, pk):
         link="/testers")
 
 
-def update_reporterprofile(req, rep, chw_id, chw_username):
+def update_reporterprofile(req, rep, chw_id, chw_username, e_mail):
     try:
         profile = ReporterProfile.objects.get(reporter=rep)
     except ReporterProfile.DoesNotExist:
@@ -295,6 +298,7 @@ def update_reporterprofile(req, rep, chw_id, chw_username):
         profile.domain = req.user.selected_domain
     profile.chw_id = chw_id
     profile.chw_username = chw_username
+    profile.e_mail = e_mail
     profile.save()
 
 def check_profile_form(req):
