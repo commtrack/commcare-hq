@@ -12,17 +12,25 @@
 {% block org_content %}
 <h2>Samples</h2>
 <br>
-<p>
+
     {% trans "Show Samples for:" %}
     <!--need a js to interact the selection-->
-    <select id="selectDistrict" name="districts" onchange="" >
+<form id="search" method="GET">
+    <select name="q">
             <option>-----------</option>
             {% for district in districts %}
             <!--put value to point to the actual html file-->
             <option value="{{ district.id }}">{{ district.name }}</option>
             {% endfor %}
     </select>
-</p>
+    <input type="submit" value="Filter"/>
+</form>
+
+<!--<form method="get" id="search">
+    <input name="q" type="text" value="{{ search_string }}" />
+    <input type="submit" value="Search" />
+</form>-->
+
 
 
 {% get_samples user %}

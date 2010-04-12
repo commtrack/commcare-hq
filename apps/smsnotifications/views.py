@@ -72,9 +72,6 @@ def index(request):
 def add_notifications(req):
 
     def get(req):
-        # pre-populate the "connections" field
-        # with a connection object to convert into a
-        # reporter, if provided in the query string
         template_name = "sms-notifications.html"
         notifications = SmsNotification.objects.all()
         districts = WqmAuthority.objects.all()

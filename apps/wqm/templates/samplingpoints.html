@@ -12,6 +12,7 @@
 
 {% block right %}
 <!--<div class="module">-->
+<a href="/samplingpoints"> <<-- Back </a>
 <div class="span-12" style="margin-left:auto; margin-right:auto; float:none">
     <form class="sfb clear" method="post" id="fm-point-add" action="/samplingpoints/{% if point %}{{ point.pk }}{% else %}add{% endif %}">
         <h3>{% if point %}Edit - {{ point }}{% else %}Add a Sampling Point{% endif %}</h3>
@@ -76,4 +77,5 @@
     </form>
 </div>
 <div class="sfb clear">&zwnj;</div>
+
 {% endblock %}

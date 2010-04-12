@@ -157,9 +157,12 @@ ul {
 }
 
 #branding h1 {
-    background: #30A8D5;
+    /*background: #30A8D5;*/
+    background: #30A8D5 url("../logo2-b.jpg") no-repeat 0% 0%;
     /*background: #940025;*/
+    /*height: 140px;*/
     padding-left: .5em;
+    padding-top: 125px;
     font-size: 28px;
     margin: 18px 0;
     font-weight: normal;
@@ -191,6 +194,9 @@ ul {
     color: white;
 }
 
+/******************************************
+** Aquatest
+******************************************/
 
 
 /*******************************************

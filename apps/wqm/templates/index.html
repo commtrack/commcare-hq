@@ -27,55 +27,50 @@
     </select>
 </p>
 
-
-<!--<p class="aqua_left"><a href="/samplingpoints/add">{%trans "Add new Sampling point" %}</a></p>-->
-
 <div class="module">
-        <div class="add_left">
-            <a href="/samplingpoints/add" class="add"> Add a new Sampling Point </a>
-        </div>
-	<table>
-		<thead>
-			<tr>
-				<th scope="col">Point Name</th>
-                                <th scope="col">Area</th>
-                                <th scope="col">District</th>
-				<th scope="col">Samples(Last Month)</th>
-                                <th scope="col">Samples (All time)</th>
-                                <th scope="col">Action</th>
-			</tr>
-		</thead>
-                <tbody>{% if points.object_list %}{% for point in points.object_list %}
-			<tr>
-                                <td>{% if point.name %}{{ point.name }}{% else %} <span class="unknown">Unknown</span>{% endif %}</td>
-                                <td>{% if point.wqmarea %}{{ point.wqmarea }}{% else %} <span class="unknown">Unknown</span>{% endif %}</td>
-				<td>{% if point.wqmarea.wqmauthority %}{{ point.wqmarea.wqmauthority }}{% else %}<span class="na">None</span>{% endif %}</td>
-                                {% get_points_with_counts point %}
-                                <td>
-                                    <a href="/samplingpoints/{{ point.pk }}">Edit</a> |
-                                    <a href="/samplingpoints/{{ point.pk }}/delete">Delete</a>
+    <div style="text-align:right;">
+        <a href="/samplingpoints/add" class="add"> Add a new Sampling Point </a>
+    </div>
+    <table>
+            <thead>
+                    <tr>
+                            <th scope="col">Point Name</th>
+                            <th scope="col">Area</th>
+                            <th scope="col">District</th>
+                            <th scope="col">Samples(Last Month)</th>
+                            <th scope="col">Samples (All time)</th>
+                            <th scope="col">Action</th>
+                    </tr>
+            </thead>
+            <tbody>{% if points.object_list %}{% for point in points.object_list %}
+                    <tr>
+                            <td>{% if point.name %}{{ point.name }}{% else %} <span class="unknown">Unknown</span>{% endif %}</td>
+                            <td>{% if point.wqmarea %}{{ point.wqmarea }}{% else %} <span class="unknown">Unknown</span>{% endif %}</td>
+                            <td>{% if point.wqmarea.wqmauthority %}{{ point.wqmarea.wqmauthority }}{% else %}<span class="na">None</span>{% endif %}</td>
+                            {% get_points_with_counts point %}
+                            <td>
+                                <a href="/samplingpoints/{{ point.pk }}">Edit</a> |
+                                <a href="/samplingpoints/{{ point.pk }}/delete">Delete</a>
+                            </td>
+                    </tr>{% endfor %}{% else %}
+
+                     <tr class="no-data">
+                                <td colspan="3">
+                                        No Sampling Point Yet.
+                                        <a href="/samplingpoints/add" class="add">
+                                                Add a Sampling point
+                                        </a>
                                 </td>
-			</tr>{% endfor %}{% else %}
-                        
-                         <tr class="no-data">
-                                    <td colspan="3">
-                                            No Sampling Point Yet.
-                                            <a href="/samplingpoints/add" class="add">
-                                                    Add a Sampling point
-                                            </a>
-                                    </td>
-                            </tr>{% endif %}
-                    </tbody>
-                    <tfoot>
-                            <tr>
-                                    <td colspan="3">
-                                            {% paginator points %}
-                                    </td>
-                            </tr>
-                    </tfoot>
+                        </tr>{% endif %}
+                </tbody>
+                <tfoot>
+                        <tr>
+                                <td colspan="3">
+                                        {% paginator points %}
+                                </td>
+                        </tr>
+                </tfoot>
 	</table>
-    
-
-
+</div>
 
 {% endblock %}
