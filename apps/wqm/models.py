@@ -1,5 +1,6 @@
 import datetime
 from django.db import models
+#from django.contrib.db.gis import models
 
 from locations.models import Location
 

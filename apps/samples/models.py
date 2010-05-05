@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from django.db import models
 from django.db.models.signals import post_save
 
@@ -9,7 +8,10 @@ from reporters.models import Reporter
 from wqm.models import SamplingPoint
 from xformmanager.models import Metadata
 from hq.models import ReporterProfile
-
+from smsnotifications.models import SmsNotification, send_sms_notifications, _send_sms
+from datetime import datetime
+import httplib, urllib
+from threading import Thread
 
 H2S_XMLNS = "http://www.aquatest-za.org/h2s"
 PHYSCHEM_XMLNS = "http://www.aquatest-za.org/physchem"
@@ -115,6 +117,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
         
         # check for which form submitted and create a sample.
         # h2s test
+        vals = []
         if form_xmlns == H2S_XMLNS:
             point = SamplingPoint.objects.get(code = sample_data["h2s_test_assessment_pointcode"])
             sample.sampling_point = point
@@ -137,7 +140,10 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
             except Exception, e:
                 raise
 
+            # Note:
+            # this save makes the sample signal to be called with out the measured values
             sample.save()
+            
             # generate test result column from the registered paramater
             parameters = Parameter.objects.all()
             # initialise the tests, inorder for the index to eqaul the pk of
@@ -149,7 +155,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                 index = int(para.pk)
                 tests.insert(index, test)
 
-                
+            
             for some in tests:
                 if sample_data.get(some) != None:
                     para_id = tests.index(some)
@@ -164,8 +170,8 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                     value.parameter = Parameter.objects.get(id = para_id)
                     value.sample = sample
                     value.save()
-            # sample.measured_values = value
-    
+                    vals.append(value)
+            
         # physical chemical test
         if form_xmlns == PHYSCHEM_XMLNS:
             point = SamplingPoint.objects.get(code = sample_data["physchem_test_assessment_pointcode"])
@@ -186,7 +192,11 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
             except Exception, e:
                 raise
 
+           # Note:
+           # this save makes the sample signal to be called with out the measured values
+
             sample.save()
+
             # generate test result column from the registered paramater
             parameters = Parameter.objects.all()
             # initialise the tests, inorder for the index to eqaul the pk of
@@ -203,8 +213,9 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
             
             # TODO: ['physchem_test_assessment_temperature'] ['physchem_test_assessment_weather']
             # shuld this be in test parameter or in the notes??
-            
 
+            # empty list for measured values
+            
             for some in tests:
                 if sample_data.get(some) != None:
                     para_id = tests.index(some)
@@ -217,6 +228,10 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                     value.parameter = Parameter.objects.get(id = para_id)
                     value.sample = sample
                     value.save()
+                    vals.append(value)
 
+    # A function to send sms notification.
+    send_sms_notifications(sample,vals)
 # Register to receive signals each time a Metadata is saved
 post_save.connect(check_and_add_sample, sender=Metadata)
+
