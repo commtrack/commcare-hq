@@ -42,6 +42,9 @@ class Sample(SampleDates):
     taken_by = models.ForeignKey(Reporter)
     sampling_point = models.ForeignKey(SamplingPoint)
     notes = models.CharField(max_length=250, null=True, blank=True)
+    batch_number = models.CharField(max_length=100)
+    # some_field to check if this sample is new o not.
+    incubated = models.BooleanField(default=False)
     date_taken = models.DateTimeField()
     date_received = models.DateTimeField()
 
@@ -66,7 +69,7 @@ class ValueRule(SampleDates):
     Rules Applied to the values
     '''
     description = models.TextField()
-    parameter = models.ForeignKey(Parameter)
+    parameter = models.ForeignKey(Parameter, unique=True)
     standard = models.ForeignKey(Standard)
     water_use_type = models.ForeignKey(WaterUseType)
 
@@ -109,6 +112,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
     
     # check the form type to see if it is a new sample
     form_xmlns = instance.formdefmodel.target_namespace
+    xform = ''
     if form_xmlns in SAMPLE_XMLNS:
         # it is an xmlns we care about, so make a new sample
         sample_data = instance.formdefmodel.row_as_dict(instance.raw_data)
@@ -119,6 +123,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
         # h2s test
         vals = []
         if form_xmlns == H2S_XMLNS:
+            
             point = SamplingPoint.objects.get(code = sample_data["h2s_test_assessment_pointcode"])
             sample.sampling_point = point
             sample.date_taken = sample_data["h2s_test_assessment_assessmentdate"]
@@ -174,6 +179,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
             
         # physical chemical test
         if form_xmlns == PHYSCHEM_XMLNS:
+            
             point = SamplingPoint.objects.get(code = sample_data["physchem_test_assessment_pointcode"])
             sample.sampling_point = point
             sample.date_taken = sample_data["physchem_test_assessment_assessmentdate"]
@@ -231,7 +237,16 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                     vals.append(value)
 
     # A function to send sms notification.
-    send_sms_notifications(sample,vals)
+    send_sms_notifications(sample,vals,form_xmlns)
+
+def abnormal_range(value):
+#    range = AbnormalRange.objects.get(value_rule__parameter=value.parameter)
+    range = AbnormalRange.objects.get(id=1)
+    if value.value >= range.maximum or value.value <= value.minimum:
+        range = True
+    else:
+        range = False
+    return range
 # Register to receive signals each time a Metadata is saved
 post_save.connect(check_and_add_sample, sender=Metadata)
 

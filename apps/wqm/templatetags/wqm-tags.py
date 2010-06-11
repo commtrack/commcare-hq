@@ -1,4 +1,5 @@
 import datetime
+import calendar
 from django import template
 
 from django.core.urlresolvers import reverse
@@ -57,3 +58,18 @@ def _get_class(count):
         return "even"
     return "odd"
  
+def get_sample_count(point, start=None, end=None):
+    pnt = SamplingPoint.objects.get(id = point)
+    query = Sample.objects.filter(sampling_point=pnt)
+    
+    if start != None:
+        # query from the start date
+        query = query.filter(date_received__gte = start)
+    if end != None:
+        # query to end date
+        query = query.filter(date_received__lte = end)
+    count = query.count()
+    
+    return count
+    
+    

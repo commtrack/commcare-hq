@@ -9,6 +9,7 @@ import string
 from datetime import timedelta
 from graphing import dbhelper
 
+from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
@@ -44,10 +45,8 @@ from reporters.utils import *
 from reporters.views import message, check_reporter_form, update_reporter
 #from reporters.models import Reporter, PersistantBackend, PersistantConnection
 from reporters.models import *
-from wqm.models import SamplingPoint, WqmAuthority, WqmArea
-
-logger_set = False
-
+from wqm.models import SamplingPoint, WqmAuthority, WqmArea, DelivarySystem
+from wqm.forms import SamplingPointForm, DateForm
 
 from reporters.utils import *
 
@@ -181,7 +180,13 @@ def check_point_form(req):
 @require_http_methods(["GET", "POST"])
 @login_and_domain_required
 def add_samplingpoint(req):
-
+    point_types = SamplingPoint.POINT_TYPE_CHOICES
+    point_type_list = []
+    
+    # creating a list of point types from sampling point choices.
+    for pnt in point_types:
+        point_type_list.append(pnt[0])
+    delivary_system = DelivarySystem.objects.all()
     def get(req):
         return render_to_response(req,
             "samplingpoints.html", {
@@ -189,7 +194,8 @@ def add_samplingpoint(req):
                 # display paginated sampling points
                 "points": paginated(req, SamplingPoint.objects.all()),
                 "districts": WqmAuthority.objects.all(),
-                
+                "point_types" : point_type_list,
+                "delivary_system":delivary_system,
                 "areas": WqmArea.objects.all(),
                 })
 
@@ -275,3 +281,39 @@ def comma(string_or_list):
     else:
         list = string_or_list
         return ", ".join(list)
+
+@login_and_domain_required
+def mapindex(req):
+    samplingpoints = SamplingPoint.objects.all()
+    if req.method == 'POST': # If the form has been submitted...
+        form = DateForm(req.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            # Process the data in form.cleaned_data
+            # ...
+            return HttpResponseRedirect('/thanks/') # Redirect after POST
+    else:
+        form = DateForm() # An unbound form
+    return render_to_response(req,'wqm/index.html', {
+        'samplingpoints': samplingpoints,
+        'form': form,
+        'content': render_to_string('wqm/samplepoints.html', {'samplingpoints': samplingpoints}),
+    })
+    
+          
+#@login_and_domain_required
+#def add_samplingpoint(request):
+#    template_name = "samplingpoints.html"
+#    if request.method == 'POST': # If the form has been submitted...
+#        form = SamplingPointForm(request.POST) # A form bound to the POST data
+#        if form.is_valid(): # All validation rules pass
+#            # saving the form data is not cleaned
+#            form.save()
+#            return message(req,
+#                        "Sampling point Added" ,
+#                        link="/samplingpoints")
+#    else:
+#        form = SamplingPointForm() # An unbound form
+#
+#    return render_to_response(request,template_name, {
+#        'form': form,
+#    })
