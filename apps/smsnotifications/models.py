@@ -87,6 +87,10 @@ def send_sms_notifications(sub, vals, form_xmlns):
             print 'A: Failure Notification----------- %s -----------------'% (notice.failure_notification,)
             above = 'above range'
             below = 'below range'
+            msg3 = ''
+            msg3 += 'Their is an abnormal range in the sample'
+            thread = Thread(target=_send_sms,args=(reporter.id, msg3 ))
+            thread.start()
             
             for value in vals:
                 print '################ %s #############' % (value,)
@@ -97,10 +101,11 @@ def send_sms_notifications(sub, vals, form_xmlns):
 #                    print 'Range----------- %s -----------------'% ('False',)
         else:
             print 'B: Failure Notification----------- %s -----------------'% (notice.failure_notification,)
+            msg4 = ''
             for value in vals:
-                msg2 += " %s:%s" % (value.parameter.test_name, value.value)
-            msg2 += '. Comment: %s'%(sub.notes)
-            thread = Thread(target=_send_sms,args=(reporter.id, msg2 ))
+                msg4 =msg2 + " %s:%s" % (value.parameter.test_name, value.value)
+            msg4 += '. Comment: %s'%(sub.notes)
+            thread = Thread(target=_send_sms,args=(reporter.id, msg4 ))
             thread.start()
         
     
