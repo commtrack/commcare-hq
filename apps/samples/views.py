@@ -55,21 +55,20 @@ logger_set = False
 def samples(req):
     template_name = 'samples.html'
     context = {}
-
     districts = WqmAuthority.objects.all()
-    context['districts'] = districts
+    
+    query = WqmAuthority.objects
+    search_string = req.REQUEST.get("q", "")
+    if search_string == "":
+        query = query.all()
 
-#    search_string = req.REQUEST.get("q", "")
-#
-#    query = WqmAuthority.objects.
-#    if search_string == "":
-#        query = query.all()
-#
-#    else:
-#        query = query.filter(
-#           Q(code__icontains=search_string) |
-#           Q(name__icontains=search_string))
-#
-#    resources = paginated(req, query)
-
-    return render_to_response(req, template_name, context)
+    else:
+        query = query.get(id = search_string)
+        search_string = query
+    
+    return render_to_response(req, template_name,
+                              { 
+                              "sort_districts" : districts,
+                              "districts" : query,
+                              "search_string" : search_string,
+                              })
