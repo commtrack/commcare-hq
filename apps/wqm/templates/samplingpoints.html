@@ -16,7 +16,7 @@
 <div class="span-12" style="margin-left:auto; margin-right:auto; float:none">
     <form class="sfb clear" method="post" id="fm-point-add" action="/samplingpoints/{% if point %}{{ point.pk }}{% else %}add{% endif %}">
         <h3>{% if point %}Edit - {{ point }}{% else %}Add a Sampling Point{% endif %}</h3>
-	
+
         <!--<div>-->
         <div class="span-5 clear">
             <div style="float:right;">
@@ -36,54 +36,6 @@
         <div class="span-2">
               <input type="text" id="fm-point-add-code" name="code"{% if point %} value="{{ point.code }}"{% endif %} />
         </div>
-<!-- adding point type -->
-	  <div class="span-5 clear">
-            <div style="float:right;">
-                <label for="fm-point-add-point-type">Point Type</label>
-            </div>
-        </div>
-        <div class="span-2">
-        {% if point_types %}
-            <select name="point_type">
-                <option></option>{% for p_type in point_types %}
-                <option value="{{ p_type }}" class="depth-{{ p_type.depth }}"{% if p_type %}{% ifequal p_type point.point_type %} selected="selected"{% endifequal %}{% endif %}>{{ p_type }}</option>{% endfor %}
-            </select>
-	{% endif %}	
-	</div>
-
-<!--  adding delivary system-->
-	<div class="span-5 clear">
-            <div style="float:right;">
-                <label for="fm-point-add-delivary-system">Delivary System</label>
-            </div>
-        </div>
-	<div>
-        {% if delivary_system %}
-            <select name="delivary_system">
-                <option></option>{% for d_sys in delivary_system %}
-                <option value="{{ d_sys.pk }}" class="depth-{{ d_sys.depth }}"{% if d_sys %}{% ifequal d_sys point.delivary_system %} selected="selected"{% endifequal %}{% endif %}>{{ d_sys.name }}</option>{% endfor %}
-            </select>
-	{% else %}        
-	      <p>No Delivary system added yet.! </p>
-	{% endif %}	
-	</div>
-
-<!--  adding treatement -->
-	<div class="span-5 clear">
-            <div style="float:right;">
-                <label for="fm-point-add-name">Treatement</label>
-            </div>
-        </div>
-        <div>
-        {% if treatments %}
-            <select name="treatments">
-                <option></option>{% for treatment in treatments %}
-                <option value="{{ treatment }}" class="depth-{{ treatment.depth }}"{% if treatment %}{% ifequal treatment point.treatement %} selected="selected"{% endifequal %}{% endif %}>{{ treatment }}</option>{% endfor %}
-            </select>
-			{% endif %}
-        </div>
-
-
         <div class="span-5 clear">
             <div style="float:right;">
                 <label>Coordinates</label>
@@ -111,16 +63,12 @@
             </div>
         </div>
         <div class="span-2">
-        {% if areas %}
+            {% if areas %}
             <select name="wqmarea">
                 <option></option>{% for area in areas %}
                 <option value="{{ area.pk }}" class="depth-{{ area.depth }}"{% if point %}{% ifequal area point.wqmarea %} selected="selected"{% endifequal %}{% endif %}>{{ area.name }}</option>{% endfor %}
             </select>
-	{% else %}        
-	      <p>No wqm Area added yet.! </p>
-	{% endif %}	
-	</div>
-
+        </div>{% endif %}
 
         <div class="submit">
                 <input type="submit" value="{% if point %}Save Changes{% else %}Add Sampling Point{% endif %}" />{% if point %}

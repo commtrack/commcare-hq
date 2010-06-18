@@ -5,6 +5,9 @@
 body {
     background-color: #eeeeee;
 }
+tbody tr .check { background: url("../../webapp/icons/silk/bullet_white.png") no-repeat 0.5em 50%; }
+
+tbody tr.checked .check { background-image: url("../../webapp/icons/silk/accept.png"); }
 
 #inner {
     padding-top: 10px;
