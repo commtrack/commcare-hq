@@ -6,7 +6,7 @@ import sys
 import os
 import uuid
 import string
-from datetime import timedelta
+from datetime import timedelta, datetime
 from graphing import dbhelper
 
 from django.template.loader import render_to_string
@@ -47,7 +47,7 @@ from reporters.views import message, check_reporter_form, update_reporter
 from reporters.models import *
 from wqm.models import SamplingPoint, WqmAuthority, WqmArea, DelivarySystem
 from wqm.forms import SamplingPointForm, DateForm
-
+from samples.models import Sample
 from reporters.utils import *
 
 
@@ -60,17 +60,67 @@ def message(req, msg, link=None):
 
 @login_and_domain_required
 def index(req):
+    columns = (("name", "Point Name"),
+               ("wqmarea", "Area"),
+               )
+    sort_column, sort_descending = _get_sort_info(req, default_sort_column="name",
+                                                  default_sort_descending=False)
+    sort_desc_string = "-" if sort_descending else ""
+    search_string = req.REQUEST.get("q", "")
+
+    query = SamplingPoint.objects.order_by("%s%s" % (sort_desc_string, sort_column))
+
+    if search_string == "":
+        query = query.all()
+
+    else:
+        district = WqmAuthority.objects.get(id = search_string)
+        query = query.filter(
+           Q(wqmarea__wqmauthority__id=district.id ))
+        search_string = district
+    
+    points = paginated(req, query)
     return render_to_response(req,
         "index.html", {
-        "points": paginated(req, SamplingPoint.objects.all(), prefix="point"),
-        "districts": WqmAuthority.objects.all(),
+                       "columns": columns,
+                       "points": points, 
+                       "districts": WqmAuthority.objects.all(),
+                       "sort_column": sort_column,
+                       "sort_descending": sort_descending,
+                       "search_string": search_string,
     })
+
+def _get_sort_info(request, default_sort_column, default_sort_descending):
+    sort_column = default_sort_column
+    sort_descending = default_sort_descending
+    if "sort_column" in request.GET:
+        sort_column = request.GET["sort_column"]
+    if "sort_descending" in request.GET:
+        if request.GET["sort_descending"].startswith("f"):
+            sort_descending = False
+        else:
+            sort_descending = True
+    return (sort_column, sort_descending)
 
 @require_http_methods(["GET", "POST"])
 @login_and_domain_required
 def edit_samplingpoints(req, pk):
     point = get_object_or_404(SamplingPoint, pk=pk)
-
+    
+    point_types = SamplingPoint.POINT_TYPE_CHOICES
+    point_type_list = []
+    # creating a list of point types from sampling point choices.
+    for pnt in point_types:
+        point_type_list.append(pnt[0])
+    
+    treatment_choices = SamplingPoint.TREATEMENT_CHOICES
+    treatment_choices_list = []
+    
+    for treatment in treatment_choices:
+        treatment_choices_list.append(treatment[0])
+    
+    delivary_system = DelivarySystem.objects.all()
+    
     def get(req):
         return render_to_response(req,
             "samplingpoints.html", {
@@ -80,6 +130,9 @@ def edit_samplingpoints(req, pk):
                 "districts": WqmAuthority.objects.all(),
                 "point": point,
                 "areas": WqmArea.objects.all(),
+                "point_types" : point_type_list,
+                "treatments" : treatment_choices_list,
+                "delivary_system":delivary_system,
                 })
 
     @transaction.commit_manually
@@ -123,17 +176,22 @@ def edit_samplingpoints(req, pk):
                 longitude = req.POST.get("longitude","")
                 if longitude == "":
                     longitude = None
+                delivary_sys = DelivarySystem.objects.get(pk = req.POST.get("delivary_system",""))
                 
                 point.name = req.POST.get("name","")
                 point.code = req.POST.get("code","")
                 point.latitude = latitude
                 point.longitude = longitude
                 point.wqmarea = WqmArea.objects.get(pk = req.POST.get("wqmarea",""))
+                point.delivary_system = delivary_sys
+                point.treatement = req.POST.get("treatments","")
+                point.point_type = req.POST.get("point_type","")
                 # no exceptions, so no problems
                 # commit everything to the db
+                
                 point.save()
                 transaction.commit()
-
+                
                 return message(req,
                     "Sampling point %d updated" % (point.pk),
                     link="/samplingpoints")
@@ -182,10 +240,16 @@ def check_point_form(req):
 def add_samplingpoint(req):
     point_types = SamplingPoint.POINT_TYPE_CHOICES
     point_type_list = []
-    
     # creating a list of point types from sampling point choices.
     for pnt in point_types:
         point_type_list.append(pnt[0])
+    
+    treatment_choices = SamplingPoint.TREATEMENT_CHOICES
+    treatment_choices_list = []
+    
+    for treatment in treatment_choices:
+        treatment_choices_list.append(treatment[0])
+    
     delivary_system = DelivarySystem.objects.all()
     def get(req):
         return render_to_response(req,
@@ -195,6 +259,7 @@ def add_samplingpoint(req):
                 "points": paginated(req, SamplingPoint.objects.all()),
                 "districts": WqmAuthority.objects.all(),
                 "point_types" : point_type_list,
+                "treatments" : treatment_choices_list,
                 "delivary_system":delivary_system,
                 "areas": WqmArea.objects.all(),
                 })
@@ -236,11 +301,15 @@ def add_samplingpoint(req):
             name = req.POST.get("name","")
             ## some errrrors here.
             wqmarea = WqmArea.objects.get(pk = req.POST.get("wqmarea",""))
-
+            delivary_sys = DelivarySystem.objects.get(pk = req.POST.get("delivary_system",""))
+            
             SamplingPoint(  name = req.POST.get("name",""),
                             code = req.POST.get("code",""),
                             latitude = latitude ,
                             longitude = longitude,
+                            delivary_system = delivary_sys,
+                            treatement = req.POST.get("treatments",""),
+                            point_type = req.POST.get("point_type",""),
                             wqmarea = wqmarea,).save()
 
             # no exceptions, so no problems
@@ -284,36 +353,43 @@ def comma(string_or_list):
 
 @login_and_domain_required
 def mapindex(req):
-    samplingpoints = SamplingPoint.objects.all()
+    query = SamplingPoint.objects.all()
     if req.method == 'POST': # If the form has been submitted...
         form = DateForm(req.POST) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # Process the data in form.cleaned_data
-            # ...
-            return HttpResponseRedirect('/thanks/') # Redirect after POST
+            # convert the dates into datetime.date()
+            start = datetime.date(form.cleaned_data["startdate"])
+            end = datetime.date(form.cleaned_data["enddate"])
+            
+            faliure = req.POST.get("failure","")
+            
+            query2 = Sample.objects.filter(date_received__range(start, end))
+            if faliure:
+                # filter out result show only failures
+                pass
+            
+            query2.distinct(sampling_point)
+            samplingpoints = query2.sampling_point
+            return render_to_response(req,'wqm/index.html', {
+                'samplingpoints': samplingpoints,
+                'counts': counts,
+                'form': form,
+                'content': render_to_string('wqm/samplepoints.html', {'samplingpoints': samplingpoints}),
+            })
     else:
         form = DateForm() # An unbound form
+    
+    counts = []
+    for point in query:
+        if (point.id) == None:
+            counts[ point.id ] = Sample.objects.filter(sampling_point = point).count()
+
+    samplingpoints = query.order_by("name")
+    
     return render_to_response(req,'wqm/index.html', {
         'samplingpoints': samplingpoints,
+        'counts': counts,
         'form': form,
         'content': render_to_string('wqm/samplepoints.html', {'samplingpoints': samplingpoints}),
     })
-    
-          
-#@login_and_domain_required
-#def add_samplingpoint(request):
-#    template_name = "samplingpoints.html"
-#    if request.method == 'POST': # If the form has been submitted...
-#        form = SamplingPointForm(request.POST) # A form bound to the POST data
-#        if form.is_valid(): # All validation rules pass
-#            # saving the form data is not cleaned
-#            form.save()
-#            return message(req,
-#                        "Sampling point Added" ,
-#                        link="/samplingpoints")
-#    else:
-#        form = SamplingPointForm() # An unbound form
-#
-#    return render_to_response(request,template_name, {
-#        'form': form,
-#    })
