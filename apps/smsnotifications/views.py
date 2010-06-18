@@ -58,7 +58,7 @@ def index(request):
     template_name = 'sindex.html'
 
     notifications = SmsNotification.objects.all()
-    points = SamplingPoint.objects.all()
+    points = SamplingPoint.objects.all().order_by("name")
     districts = WqmAuthority.objects.all()
 
     return render_to_response(request,

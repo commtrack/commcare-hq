@@ -48,9 +48,21 @@
 					{% endfor %}
 				</td>
 				<td>{{ notification.authorised_sampler.full_name }}</td>
-                                <td>{{ notification.notification_type }}</td>
-				<td>{{ notification.failure_notification }}</td>
-                                <td>{{ notification.digest }}</td>
+                <td>{{ notification.notification_type }}</td>
+				<td>
+					{% if notification.failure_notification %}
+						<img src="{{MEDIA_URL}}/hq/accept.png">
+					{% else %}
+						<img src="{{MEDIA_URL}}/hq/decline.png">
+					{% endif %}
+				</td>
+                <td>
+                	{% if notification.digest %}
+                		<img src="{{MEDIA_URL}}/hq/accept.png">
+                	{% else %}
+                		<img src="{{MEDIA_URL}}/hq/decline.png">
+                	{% endif %}
+                </td>
                                 <td>
                                     <a href="/smsnotification/{{ notification.pk }}">Edit</a> |
                                     <a href="/smsnotification/{{ notification.pk }}/delete">Delete</a>
