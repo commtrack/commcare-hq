@@ -42,7 +42,7 @@ class DelivarySystem(models.Model):
         return self.name
     
 class SamplingPoint(WqmLocation):
-    """ The point the tests are done """
+    """ The point where tests are done """
     POINT_TYPE_CHOICES = (
                                   ("ground", "Ground"),
                                   ("surface","Surface"),
