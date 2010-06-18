@@ -30,7 +30,7 @@ class Parameter(SampleDates):
     test_name = models.CharField(max_length=120)
     unit = models.CharField(max_length=50, null=True, blank=True)
     lookup_hint = models.BooleanField()
-    test_name_short = models.CharField(max_length=20)
+    test_name_short = models.CharField(max_length=20, help_text="must correspond to xform test")
 
     def __unicode__(self):
         return self.test_name
