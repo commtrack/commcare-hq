@@ -57,6 +57,7 @@
                 <label for="fm-point-add-delivary-system">Delivary System</label>
             </div>
         </div>
+	<div>
         {% if delivary_system %}
             <select name="delivary_system">
                 <option></option>{% for d_sys in delivary_system %}
@@ -73,8 +74,13 @@
                 <label for="fm-point-add-name">Treatement</label>
             </div>
         </div>
-        <div class="span-2">
-                <input type="text" class="required" id="fm-point-add-name" name="name"{% if point %} value="{{ point.name }}"{% endif %} />
+        <div>
+        {% if treatments %}
+            <select name="treatments">
+                <option></option>{% for treatment in treatments %}
+                <option value="{{ treatment }}" class="depth-{{ treatment.depth }}"{% if treatment %}{% ifequal treatment point.treatement %} selected="selected"{% endifequal %}{% endif %}>{{ treatment }}</option>{% endfor %}
+            </select>
+			{% endif %}
         </div>
 
 
