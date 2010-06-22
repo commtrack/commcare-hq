@@ -1,5 +1,4 @@
 *.pyc
-local.ini
 .project
 .pydevproject
 data/attachments/*
