@@ -72,11 +72,26 @@ def get_tester(current_user):
 
 @login_and_domain_required
 def index(req):
-    reporters = get_tester(req.user)
+#    reporters = get_tester(req.user)
+    query = ReporterProfile.objects.filter(domain=req.user.selected_domain)
+    search_string = req.REQUEST.get("q", "")
+    if search_string == "":
+        pass
+    else:
+        query = query.filter(
+           Q(reporter__first_name__icontains = search_string ) |
+           Q(reporter__last_name__icontains = search_string))
+    
+    reporters = []
+    for rep in query:
+        reporter = rep.reporter
+        reporters.append(reporter)
+    
     return render_to_response(req,
         "testers/index.html", {
         "reporters": paginated(req, reporters, prefix="rep"),
         "groups":    paginated(req, ReporterGroup.objects.flatten(), prefix="grp"),
+        "search_string" : search_string,
     })
 
 

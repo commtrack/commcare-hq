@@ -1,0 +1,7 @@
+<select>
+{% for samplingpoint in samplingpoints %}
+        <option id={{samplingpoint.id}} class='samplingpoint linkOFF'>
+             {{samplingpoint.name}} - {{samplingpoint.wqmarea}} ({{samplingpoint.point.y}}, {{samplingpoint.point.x}})
+        </option>
+{% endfor %}
+</select>

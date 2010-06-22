@@ -68,7 +68,7 @@ def get_samples(user):
     for tester in testers:
         some_samples = Sample.objects.filter(taken_by=tester)
         samples.extend(some_samples)
-
+    
     ret += '<tbody>'
     count = 1
     if samples:
