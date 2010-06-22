@@ -1,10 +1,10 @@
 from django.contrib import admin
-from calender.models import SyncEvents
+from calender.models import SyncEvent
 
 
 
-class SyncEventsAdmin(admin.ModelAdmin):
+class SyncEventAdmin(admin.ModelAdmin):
     list_display = ('event_id','date','status')
     search_fields = ('event_id','date','status')
     list_filter = ['event_id','date','status']
-admin.site.register(SyncEvents, SyncEventsAdmin)
+admin.site.register(SyncEvent, SyncEventAdmin)

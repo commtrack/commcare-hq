@@ -61,7 +61,8 @@ logger_set = False
 
 @login_and_domain_required
 def calender(req):
-    send_event_google_calender('Samples')
+    sync_events_for_whole_month()
+#    send_event_google_calender('Samples')
 #    send_event_google_calender('sample.sampling_point','sample.taken_by','h2s')
     context = {}
     return render_to_response(req,'calender.html', context)

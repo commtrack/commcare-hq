@@ -61,5 +61,6 @@ logger_set = False
 def cal(req):
     template_name = 'calenderjs.html'
     context = {}
-    send_event_google_calender('Samples')
+    sync_events_for_whole_month()
+#    send_event_google_calender('Samples')
     return render_to_response(req, template_name, context)
