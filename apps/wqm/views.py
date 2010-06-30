@@ -49,7 +49,7 @@ from wqm.models import SamplingPoint, WqmAuthority, WqmArea, DelivarySystem
 from wqm.forms import SamplingPointForm, DateForm
 from samples.models import Sample, AbnormalRange, MeasuredValue, ValueRule
 from reporters.utils import *
-
+from wqm.forms import DateForm, SamplingPointForm
 
 def message(req, msg, link=None):
     return render_to_response(req,
@@ -395,7 +395,7 @@ def comma(string_or_list):
 
 @login_and_domain_required
 def mapindex(req):
-    samplingpoints = SamplingPoint.objects.all()
+    samplingpoints = SamplingPoint.objects.all().order_by('wqmarea__name','name')
 
 #    counting the number of abnormal range values..
 #    Get the abnormal values from the sample submitted.

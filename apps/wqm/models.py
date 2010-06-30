@@ -55,7 +55,8 @@ class SamplingPoint(WqmLocation):
     point_type = models.CharField(max_length=30, choices=POINT_TYPE_CHOICES)
     delivary_system = models.ForeignKey(DelivarySystem)
     treatement = models.CharField(max_length=30, choices=TREATEMENT_CHOICES)
-    point = models.PointField(blank=True)
+    point = models.PointField(blank=True, null=True)
+    
     objects = models.GeoManager()
 
     def __unicode__(self):
