@@ -1,164 +1,25 @@
 from datetime import datetime
+import httplib, urllib
+#from threading import Thread
+
 from django.db import models
 from django.db.models.signals import post_save
 
 from locations.models import Location
-from standards.models import Standard, WaterUseType
 from reporters.models import Reporter
-from wqm.models import SamplingPoint
+
 from xformmanager.models import Metadata
 from hq.models import ReporterProfile
-from smsnotifications.models import SmsNotification, send_sms_notifications, _send_sms
-from datetime import datetime
-import httplib, urllib
-from threading import Thread
-from calender.models import SyncEvent, get_id
-#from djangogcal.calendar import *
 
-from datetime import datetime
-try:
-  from xml.etree import ElementTree
-except ImportError:
-  from elementtree import ElementTree
-import gdata.calendar.service
-import gdata.service
-import atom.service
-import gdata.calendar
-import atom
-import getopt
-import sys
-import string
-import time
+from standards.models import Standard, WaterUseType
+from wqm.models import SamplingPoint
+from smsnotifications.utils import send_sms_notifications
 
 H2S_XMLNS = "http://www.aquatest-za.org/h2s"
 PHYSCHEM_XMLNS = "http://www.aquatest-za.org/physchem"
 SAMPLE_XMLNS = [H2S_XMLNS, PHYSCHEM_XMLNS]
 
 # TODO: clean up the code.
-def today_samples_data(day):
-    today = day
-    query = Sample.objects.filter(  date_received__day = today.day,
-                                    date_received__month = today.month,
-                                    date_received__year = today.year)
-    return query
-
-def count_samples(day):
-    today = day
-    query = Sample.objects.filter(  date_received__day = today.day,
-                                    date_received__month = today.month,
-                                    date_received__year = today.year)
-    count = query.count()
-    return count
-def event_sent(day):
-    today = day
-    a = SyncEvent.objects.get(      date__day = today.day,
-                                    date__month = today.month,
-                                    date__year = today.year)
-    return a
-
-def count_events(day):
-    today = day
-    a = SyncEvent.objects.filter(  date__day = today.day,
-                                    date__month = today.month,
-                                    date__year = today.year)
-    n = a.count()
-    return n
-
-def sync_event_editlink(new_event,content,day):
-    sent_events = count_events(day)
-    sync = SyncEvent()
-    if sent_events == 0:
-        sync.event_id = new_event.GetEditLink().href
-        sync.date = day
-        sync.contents = content
-        sync.status = True
-        sync.save()
-    else:
-        a = event_sent(day)
-        a.event_id = new_event.GetEditLink().href
-        a.date = day
-        a.contents = content
-        a.status = True
-        a.save()
-    return 1
-
-def sync_events_for_whole_month():
-    where = 'Samples'
-    d = datetime.today()
-    days_in_month = calendar.mdays[d.month]
-    for i in range(1,days_in_month + 1):
-        date = datetime(d.year, d.month, i)
-        send_event_google_calender(where,date)
-    return 1
-
-def format_date_for_google(day):
-    month = day.month
-    date = day.day
-    if date < 10 and month < 10:
-        dat = '%s-0%s-0%s' % (day.year, day.month, day.day)
-    elif date < 10 and month > 9:
-        dat = '%s-%s-0%s' % (day.year, day.month, day.day)
-    elif date > 9 and month < 10:
-        dat = '%s-0%s-%s' % (day.year, day.month, day.day)
-    elif date > 9 and month > 9:
-        dat = '%s-%s-%s' % (day.year, day.month, day.day)
-    return dat
-
-def send_event_google_calender(where,date):
-    day = date
-    cal_client = gdata.calendar.service.CalendarService()
-    cal_client.email = 'aquatest.project@gmail.com'
-    cal_client.password = 'admin1234xy'
-    cal_client.source = 'Google-Calendar_Python_Sample-1.0'
-    cal_client.ProgrammaticLogin()
-    count = count_samples(day)
-    title = ("%s %s") % (count,where)
-    data = today_samples_data(day)
-    content =""" """
-    content += """
-    <table border="1">
-        <thead>
-            <tr>
-                <th>Date taken    </th>
-                <th>Sampling Point</th>
-                <th>Tester        </th>
-                <th>parameters    </th>
-            </tr>
-        </thead>
-        <tbody>
-        """
-    for i in data:
-        content += """<tr>"""
-        content += """ <td>%s</td>""" % i.date_taken
-        content += """ <td>%s</td>""" % i.sampling_point
-        content += """ <td>%s</td>""" % i.taken_by
-        content += """ <td>h2s positive ph 7.3 cl 36mg</td>"""
-        content += """</tr>"""
-    content += """</tbody></table>"""
-#    parameters are coded should be made automatic
-    event = gdata.calendar.CalendarEventEntry()
-    event.title = atom.Title(text=title)
-    event.content = atom.Content(text=content)
-    start_time = format_date_for_google(day)
-    end_time = format_date_for_google(day)
-    event.when.append(gdata.calendar.When(start_time=start_time, end_time=end_time))
-    cal_path = '/calendar/feeds/aquatest.project@gmail.com/private/full'
-
-    n = count_events(day)
-    if n == 0:
-        new_event = cal_client.InsertEvent(event, cal_path)
-        if new_event:
-            sync_event_editlink(new_event,content,day)
-    else:
-        event_url= get_id()
-        event.title = atom.Title(text=title)
-        event.content = atom.Content(text=content)
-        event_url= get_id()
-        update_event = cal_client.UpdateEvent(event_url, event)
-        if update_event:
-            sync_event_editlink(update_event,content,day)
-
-    return 1
 
 
 class SampleDates(models.Model):
@@ -361,7 +222,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                 tests.insert(index, test)
             
             # TODO: ['physchem_test_assessment_temperature'] ['physchem_test_assessment_weather']
-            # shuld this be in test parameter or in the notes??
+            # should this be in test parameter or in the notes??
 
             # empty list for measured values
             
@@ -378,24 +239,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                     value.sample = sample
                     value.save()
                     vals.append(value)
-    date = tatetime.today()
-    where = 'Samples'
-    send_event_google_calender(where,date)
-
-#   Get the abnormal values from the sample submitted.
-#    abnormal_values = []
-#    count = 0
-#    for v in vals:
-#        abnormal_range = AbnormalRange.objects.get(value_rule__parameter = v.parameter)
-#        min = abnormal_range.minimum
-#        max = abnormal_range.maximum
-#        if v.value in range(min,max):
-#            abnormal_values.append(v)
-#    print "-----AB Values-------- -%s" %(abnormal_values,)
-    
-    # A function to send sms notification.
-    send_sms_notifications(sample,vals,form_xmlns)
-
+        send_sms_notifications(sample,vals,form_xmlns)
 # Register to receive signals each time a Metadata is saved
 post_save.connect(check_and_add_sample, sender=Metadata)
 

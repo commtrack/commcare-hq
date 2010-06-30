@@ -1,6 +1,5 @@
 from smsnotifications.models import SmsNotification, NotificationChoice
 from django.contrib import admin
-from hq.models import *
 
 class SmsNotificationAdmin(admin.ModelAdmin):
     list_display = ('authorised_sampler', 'notification_type','digest','modified','created')
