@@ -1,8 +1,8 @@
 #from django.contrib import admin
 from django.contrib.gis import admin
-#from django.contrib.gis.maps.google import GoogleMap
+from django.contrib.gis.maps.google import GoogleMap
 
-#GMAP = GoogleMap(key='abcdefg') # Can also set GOOGLE_MAPS_API_KEY in settings
+GMAP = GoogleMap(key='ABQIAAAAwLx05eiFcJGGICFj_Nm3yxSy7OMGWhZNIeCBzFBsFwAAIleLbBRLVT87XVW-AJJ4ZR3UOs3-8BnQ-A') # Can also set GOOGLE_MAPS_API_KEY in settings
 
 from hq.models import *
 from wqm.models import WqmAuthority, WqmArea, SamplingPoint, DelivarySystem
@@ -56,4 +56,28 @@ class SamplingPointAdmin(admin.OSMGeoAdmin):
 admin.site.register(SamplingPoint, SamplingPointAdmin)
 #admin.site.register(SamplingPoint, admin.GeoModelAdmin)
 
+
 admin.site.register(DelivarySystem)
+
+class SamplingPointAdminGoogle(admin.OSMGeoAdmin):
+    extra_js = [GMAP.api_url + GMAP.key]
+    map_template = 'wqm/admin/google.html'
+    
+    list_display = ('name', 'wqmarea', 'modified', 'created')
+    search_fields = ('name', 'wqmarea', 'modified', 'created')
+    list_filter = ['name']
+    fieldsets = (
+        (None, {
+            'fields' : ('name', 'code', 'wqmarea', 'modified', 'created')
+        }),
+        (None, {
+            'fields' : ('point_type', 'delivary_system','treatement')
+        }),
+        ('Map', {
+            'fields' : ('point',)
+        }),
+    )
+# Register the google enabled admin site
+google_admin = admin.AdminSite()
+google_admin.register(SamplingPoint, SamplingPointAdminGoogle)
+

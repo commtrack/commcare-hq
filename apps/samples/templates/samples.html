@@ -15,7 +15,9 @@
 
 <h1>
     {% if search_string %}
-    	{{ search_string }}
+    {% for d in search_string %}
+    	{{ d }}
+    {% endfor %}
     {% endif %}
 </h1>
 
@@ -32,6 +34,6 @@
     <input type="submit" value="Filter"/>
 </form>
 
-{% get_samples user %}
+{% get_samples user districts %}
 
 {% endblock %}

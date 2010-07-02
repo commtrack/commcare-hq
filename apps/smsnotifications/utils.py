@@ -2,9 +2,28 @@ from datetime import datetime
 import httplib, urllib
 from threading import Thread
 
+#from samples.models import AbnormalRange # already in samples.models.py 
+
+def _send_sms(reporter_id, message_text):
+    data = {"uid":  reporter_id,
+            "text": message_text
+            }
+    encoded = urllib.urlencode(data)
+    headers = {"Content-type": "application/x-www-form-urlencoded",
+               "Accept": "text/plain"}
+    try:
+        conn = httplib.HTTPConnection("localhost:8000") # TODO: DON'T HARD CODE THIS!
+        conn.request("POST", "/ajax/messaging/send_message", encoded, headers)
+        response = conn.getresponse()
+    except Exception, e:
+        # TODO: better error reporting
+        raise
+
+
 def send_sms_notifications(sub, vals, form_xmlns):
     # TODO: Lookup the reporters based on the sample point and
     # figure out who to send to, what to send
+    print "---------------You TEXTING -----------------------"
     form = FormDefModel.objects.get(target_namespace = form_xmlns)
     choice = NotificationChoice.objects.get(xform = form)
     print '---------------->>>>>>>>>>>  %s  <<<<<<<<<<<------------'% (choice,)

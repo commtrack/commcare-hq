@@ -1,6 +1,9 @@
 from django.forms import ModelForm
 from django import forms
 from django.contrib.admin import widgets
+from django.forms.fields import CharField
+from django.contrib.gis.admin.options import GeoModelAdmin
+from wqm.admin import google_admin
 #from django.forms.extras.widgets import SelectDateWidget
 #from django.forms.widgets import Input
 #from django.utils.safestring import mark_safe
@@ -8,24 +11,25 @@ from django.contrib.admin import widgets
 from wqm.models import *
 
 class DateForm(forms.Form):
-    startdate = forms.DateField()
-    enddate = forms.DateField()
+    startdate = forms.DateField(widget = widgets.AdminDateWidget())
+    enddate = forms.DateField(widget = widgets.AdminDateWidget())
 
 
-#class SamplingPointForm(forms.Form):
-#    name = forms.CharField()
-#    code = forms.CharField()
-#    wqmarea = forms.ModelChoiceField(WqmArea)
-#    point_type = forms.ChoiceField(choices=SamplingPoint.POINT_TYPE_CHOICES)
-#    delivary_system = forms.ModelChoiceField(DelivarySystem)
-#    treatement = forms.ChoiceField(choices=SamplingPoint.TREATEMENT_CHOICES)
-#    point = forms.CharField(widget=GMapInput(attrs={'width':'600', 'height':'400'}))
-#    
+geomodeladmin =  GeoModelAdmin(SamplingPoint, google_admin)
+db_field = SamplingPoint._meta.get_field('point')
+ 
 class SamplingPointForm(ModelForm):
+    point = CharField(widget=geomodeladmin.get_map_widget(db_field))
+    
     class Meta:
         model = SamplingPoint
-        exclude = ('point',)
-# 
+        exclude = ('longitude','latitude','modified','created','type','parent')
+    
+    class Media:
+                js = (
+                    "http://openlayers.org/api/2.6/OpenLayers.js",
+                 )
+ 
 #class GMapInput(Input):
 #    """
 #    Widget para seleccionar un punto en un mapa de Google

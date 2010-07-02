@@ -31,20 +31,20 @@
 			</tr>
 		</thead>
                 <tbody>{% if notifications.object_list %}{% for notification in notifications.object_list %}
-			<tr>
+			<tr class="{% cycle 'rowo' 'rowt' %}">
 				<td> 
 					{% for point in notification.sampling_point.all %}
-						{{ point.wqmarea.wqmauthority }},
+						{{ point.wqmarea.wqmauthority }} <br />
 					{% endfor %}
 				</td>
 				<td> 
 					{% for point in notification.sampling_point.all %} 
-						{{ point.wqmarea }}
+						{{ point.wqmarea }} <br />
 					{% endfor %}
 				</td>
 				<td> 
 					{% for point in notification.sampling_point.all %}
-						{{ point }},
+						{{ point }} <br />
 					{% endfor %}
 				</td>
 				<td>{{ notification.authorised_sampler.full_name }}</td>

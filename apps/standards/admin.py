@@ -3,10 +3,6 @@ from django.contrib import admin
 from hq.models import *
 from django.contrib import admin
 
-'''
-customize
-'''
-
 class WaterUseTypeAdmin(admin.ModelAdmin):
     list_display = ('description', 'modified','created')
     search_fields = ('description', 'modified','created')

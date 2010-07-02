@@ -5,28 +5,22 @@ from django.shortcuts import get_object_or_404
 from django.db.models.query_utils import Q
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db import transaction
 
 from rapidsms.webui.utils import render_to_response, paginated
 from domain.decorators import login_and_domain_required
 from wqm.models import WqmAuthority, SamplingPoint
 from smsnotifications.models import SmsNotification #, NotificationChoice
-#from smsnotifications.forms import SmsNotificationForm
+from smsnotifications.forms import SmsNotificationForm
+from reporters.views import message
 
-#logger_set = False
-
-# temporary placed here, need to move back to forms.py
-from django.forms import ModelForm
-
-class SmsNotificationForm(ModelForm):
-    class Meta:
-        model = SmsNotification
-        exclude = ('modified','created',)
+logger_set = False
 
 @login_and_domain_required
 def index(request):
     template_name = 'sindex.html'
 
-    notifications = SmsNotification.objects.all()
+    notifications = SmsNotification.objects.all().order_by("-authorised_sampler")
     points = SamplingPoint.objects.all().order_by("name")
     districts = WqmAuthority.objects.all()
 
@@ -125,7 +119,6 @@ def edit_notifications(request, pk):
         form = SmsNotificationForm(request.POST, instance = notification) # A form bound to the POST data
         if form.is_valid(): # All validation rules pass
             # saving the form data is not cleaned
-            notification.delete()
             form.save()
             return message(request,
                         "SMS Notification Updated",

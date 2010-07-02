@@ -42,10 +42,10 @@ import hq.reporter.inspector as repinspector
 import hq.reporter.metadata as metadata
 
 from domain.decorators import login_and_domain_required
-from reporters.utils import *
-from reporters.views import message, check_reporter_form, update_reporter
-from reporters.models import Reporter, PersistantBackend, PersistantConnection
-from locations.models import Location, LocationType
+#from reporters.utils import *
+#from reporters.views import message, check_reporter_form, update_reporter
+#from reporters.models import Reporter, PersistantBackend, PersistantConnection
+#from locations.models import Location, LocationType
 from wqm.models import WqmAuthority
 
 logger_set = False
@@ -63,7 +63,7 @@ def samples(req):
         query = query.all()
 
     else:
-        query = query.get(id = search_string)
+        query = query.filter(id = search_string)
         search_string = query
     
     return render_to_response(req, template_name,

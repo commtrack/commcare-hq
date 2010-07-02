@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     (r'^samplingpoints/(?P<pk>\d+)/delete$', 'wqm.views.delete_samplingpoints'),
     (r'^samplingpoints/mapindex', 'wqm.views.mapindex'),
     (r'^my_admin/jsi18n', 'django.views.i18n.javascript_catalog'),
+
 )

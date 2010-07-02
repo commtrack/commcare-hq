@@ -46,7 +46,7 @@
 			</tr>
 		</thead>
 		<tbody>{% if reporters.object_list %}{% for reporter in reporters.object_list %}
-			            <tr>
+			            <tr class="{% cycle 'rowo' 'rowt' %}">
 								<td><a href="/testers/{{ reporter.pk }}"{% if reporter.last_name %}>{{ reporter.last_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
                                 <td><a href="/testers/{{ reporter.pk }}"{% if reporter.last_name %}>{{ reporter.first_name }}{% else %} class="unknown">Unknown{% endif %}</a></td>
 								<td>{% if reporter.connection %}{{ reporter.connection.identity }}{% else %}<span class="na">None</span>{% endif %}</td>

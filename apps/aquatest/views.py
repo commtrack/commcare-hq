@@ -27,10 +27,10 @@ from django.contrib.contenttypes.models import ContentType
 from rapidsms.webui.utils import render_to_response, paginated
 
 from domain.decorators import login_and_domain_required
-from xformmanager.models import *
+#from xformmanager.models import *
 from hq.models import *
-from graphing.models import *
-from receiver.models import *
+#from graphing.models import *
+#from receiver.models import *
 
 import hq.utils as utils
 import hq.reporter as reporter
@@ -41,15 +41,10 @@ import hq.reporter.inspector as repinspector
 import hq.reporter.metadata as metadata
 
 from reporters.utils import *
-from reporters.views import message, check_reporter_form, update_reporter
-#from reporters.models import Reporter, PersistantBackend, PersistantConnection
-from reporters.models import *
+from reporters.views import update_reporter
+from reporters.models import Reporter, PersistantBackend, PersistantConnection
 
 logger_set = False
-
-
-from reporters.utils import *
-
 
 def message(req, msg, link=None):
     return render_to_response(req,

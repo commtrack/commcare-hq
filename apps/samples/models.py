@@ -1,11 +1,11 @@
 from datetime import datetime
-import httplib, urllib
+#import httplib, urllib
 #from threading import Thread
 
 from django.db import models
 from django.db.models.signals import post_save
 
-from locations.models import Location
+#from locations.models import Location
 from reporters.models import Reporter
 
 from xformmanager.models import Metadata
@@ -51,6 +51,9 @@ class Sample(SampleDates):
     incubated = models.BooleanField(default=False)
     date_taken = models.DateTimeField()
     date_received = models.DateTimeField()
+    
+    class Meta:
+        ordering = ['-date_received']
 
     def __unicode__(self):
         return self.notes
@@ -111,8 +114,12 @@ class AbnormalRange(Range):
     
     
 def check_and_add_sample(sender, instance, created, **kwargs): #get sender, instance, created
+    """
+       Check the receives x-forms and adds the submitted sample to the database
+       then calls the send_smsnotification function.
+   """
     # only process newly created forms, not all of them
-    if not created:             return
+    if not created:        return
     
     # check the form type to see if it is a new sample
     form_xmlns = instance.formdefmodel.target_namespace
@@ -153,12 +160,12 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
             # this save makes the sample signal to be called with out the measured values
             sample.save()
             
-            # generate test result column from the registered paramater
+            # generate test result column from the registered parameter
             parameters = Parameter.objects.all()
-            # initialise the tests, inorder for the index to eqaul the pk of
-            # the parameter. ( a better way of refering to a parameter shuld
+            # initialize the tests, in-order for the index to equal the pk of
+            # the parameter. ( a better way of referring to a parameter should
             # be looked upon).
-            tests = [None] * 100 # TODO: Initialise the tests (multiply wit some big number)
+            tests = [None] * 100 # TODO: Initialize the tests (multiply wit some big number)
             for para in parameters:
                 test = "h2s_test_testresults_" + para.test_name_short
                 index = int(para.pk)
@@ -207,16 +214,16 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
 
             sample.save()
 
-            # generate test result column from the registered paramater
+            # generate test result column from the registered parameter
             parameters = Parameter.objects.all()
-            # initialise the tests, inorder for the index to eqaul the pk of
-            # the parameter. ( a better way of refering to a parameter shuld
+            # initialize the tests, in-order for the index to equal the pk of
+            # the parameter. ( a better way of referring to a parameter should
             # be looked upon).
             
-            tests = [None] * 100 # TODO: Initialise the tests (multiply wit some big number)
+            tests = [None] * 100 # TODO: Initialize the tests (multiply wit some big number)
             for para in parameters:
                 test = "physchem_test_testresults_" + para.test_name_short
-                if sample_data.get(test) == None: # a simple check to get temperature and weather assements
+                if sample_data.get(test) == None: # a simple check to get temperature and weather assessments
                     test =  "physchem_test_assessment_" + para.test_name_short
                 index = int(para.pk)
                 tests.insert(index, test)

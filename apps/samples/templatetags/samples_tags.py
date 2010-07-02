@@ -3,6 +3,7 @@ from django import template
 
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+from django.db.models.query_utils import Q
 
 from django.contrib.contenttypes.models import ContentType
 from types import ListType,TupleType
@@ -18,6 +19,7 @@ from reporters.models import Reporter
 register = template.Library()
 
 from graphing.models import RawGraph
+from wqm.models import SamplingPoint, WqmArea, WqmAuthority
 
 import time
 
@@ -48,7 +50,7 @@ def _get_class(count):
     return "odd"
 
 @register.simple_tag
-def get_samples(user):
+def get_samples(user, districts):
     # TODO: Get all the tester in the same domain and display them
     # with the total samples.
     testers = get_tester(user)
@@ -62,12 +64,17 @@ def get_samples(user):
             <th>Results</th></tr></thead>'''
 
 
-    # samples are listed accourding to the tester,
-    # wheras according to the received date is more appropriate.
+    # samples are listed according to the received date,
+    # filter in districts and tester in the domain
+    districts_ids = []
+    for d in districts:
+        districts_ids.append(d.id)
+        
     samples = []
-    for tester in testers:
-        some_samples = Sample.objects.filter(taken_by=tester)
-        samples.extend(some_samples)
+    query = Sample.objects.filter(taken_by__in=testers)
+    query = query.filter(sampling_point__wqmarea__wqmauthority__in = districts_ids)
+    some_samples = query
+    samples.extend(some_samples)
     
     ret += '<tbody>'
     count = 1
@@ -88,7 +95,7 @@ def get_samples(user):
             if results:
                 ret += '<td>'
                 for result in results:
-                    ret += '%s %s, ' % (result.value, result.parameter.test_name_short)
+                    ret += '%s %s%s, <br />' % (result.parameter.test_name, result.value,result.parameter.unit)
                 ret += '</td>'
             else:
                 ret += '<td>%s</td>' % ('No parameter for this submited sample')

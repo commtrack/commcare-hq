@@ -7,9 +7,6 @@ from xformmanager.models import FormDefModel
 from reporters.models import Reporter
 from wqm.models import SamplingPoint
 
-
-
-
 # TODO: auto-create a notication choices as the xform is added to a domain.
 # link the notification type to the xform
 #NOTIFICATION_TYPE_CHOICES = (
@@ -37,18 +34,3 @@ class SmsNotification(models.Model):
     
     def __unicode__(self):
             return '%s notification for %s'%(self.notification_type, self.authorised_sampler)
-
-def _send_sms(reporter_id, message_text):
-    data = {"uid":  reporter_id,
-            "text": message_text
-            }
-    encoded = urllib.urlencode(data)
-    headers = {"Content-type": "application/x-www-form-urlencoded",
-               "Accept": "text/plain"}
-    try:
-        conn = httplib.HTTPConnection("localhost:8000") # TODO: DON'T HARD CODE THIS!
-        conn.request("POST", "/ajax/messaging/send_message", encoded, headers)
-        response = conn.getresponse()
-    except Exception, e:
-        # TODO: better error reporting
-        raise

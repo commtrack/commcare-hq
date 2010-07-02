@@ -1,5 +1,5 @@
 from django.contrib import admin
-from samples.models import *
+from samples.models import Parameter, Sample, MeasuredValue, ValueRule, NormalRange, AbnormalRange
 
 class MeasuredValueInline(admin.TabularInline):
     model = MeasuredValue
