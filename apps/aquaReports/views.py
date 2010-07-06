@@ -35,10 +35,15 @@ from domain.decorators import login_and_domain_required
 
 from reporters.models import Reporter
 
-from wqm.models import SamplingPoint, WqmAuthority, WqmArea
+#from wqm.models import SamplingPoint, WqmAuthority, WqmArea
 from samples.models import Parameter, Sample, MeasuredValue
+from aquaReports.forms import SelectSamplingPointForm, SelectParameterForm, SelectTesterForm
 
 logger_set = False
+
+points_list = []        # selected sampling_points
+testers_list = []       # selected testers
+parameters_list = []    # selected parameters 
 
 def message(req, msg, link=None):
     return render_to_response(req,
@@ -49,8 +54,24 @@ def message(req, msg, link=None):
 
 @login_and_domain_required
 def index(req):
+    selected_point = points_list[0]
+    selected_reporters = testers_list[0]
+    selected_parameters = parameters_list[0]
+    
+    points_list.pop()
+    testers_list.pop()
+    parameters_list.pop()
+    
+    reports = MeasuredValue.objects.filter( sample__sampling_point__in = selected_point,
+                                            parameter__in = selected_parameters)
+    reports = reports.filter(sample__taken_by__in = selected_reporters)
     return render_to_response(req,
-        "samplesreport.html")
+        "samplesreport.html", {
+        "reports": reports,
+        "samplingpoints" :selected_point,
+        "testers": selected_reporters,
+        "parameters": selected_parameters, 
+    })
 
 def get_tester(current_user):
     # todo: get the testers in the system with the same
@@ -64,59 +85,60 @@ def get_tester(current_user):
             reporters.append(reporter)
     return reporters
 
-def samplesreport(req):
-    points = SamplingPoint.objects.all()
-    testers = get_tester(req.user)
-    parameters = Parameter.objects.all()
-    return render_to_response(req,
+
+@login_and_domain_required
+def samplesreport_index(request):
+    if request.method == 'POST': # If the form has been submitted...
+        form = SelectSamplingPointForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            sl_points = form.cleaned_data['sampling_points']
+            points_list.append(sl_points)
+            url = '/aquareports/testers'
+            return HttpResponseRedirect(url) # Redirect after POST
+    else:
+        form = SelectSamplingPointForm() # An unbound form
+
+    return render_to_response(request,
         "samplesreport.html", {
-        "points": points,
-        #"testers": testers,
-        #"parameters" : parameters,
+        "form": form,
     })
 
-def report_testers(req):
-#    points = req.POST.get("points","")
-#    selected_point = SamplingPoint.objects.filter(id = points)
-#    samples = Sample.objects.filter(sampling_point=selected_point)
-#    return render_to_response(req, 'samplesreport.html', {'testers' : samples})
-    choice1 = req.POST.get("points","")
-    choice2 = req.POST.get("testers","")
-    choice3 = req.POST.get("parameters","")
-    para = None
-    samples = None
-#    reports = None
-    if choice1:
-        selected_point = SamplingPoint.objects.filter(id = choice1)
-        samples = Sample.objects.filter(sampling_point=selected_point)
-
+def samplesreport_testers(request):
+    ss = points_list[0]
+    if request.method == 'POST': # If the form has been submitted...
+        form = SelectTesterForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            sl_testers = form.cleaned_data['testers']
+            testers_list.append(sl_testers)
+            url = '/aquareports/parameters'
+            return HttpResponseRedirect(url) # Redirect after POST
     else:
-        choice1 = req.POST.get('sel_points','')
+        form = SelectTesterForm() # An unbound form
 
-    if choice2:
-        para = Parameter.objects.all()
+    return render_to_response(request,
+        "samplesreport.html", {
+        "form": form,
+        "points": ss,
+    })
+
+
+def samplesreport_parameters(request):
+    ss = testers_list[0]
+    if request.method == 'POST': # If the form has been submitted...
+        form = SelectParameterForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            sl_parameters = form.cleaned_data['parameters']
+            parameters_list.append(sl_parameters)
+            url = '/index'
+            return HttpResponseRedirect(url)
     else:
-        choice2 = req.POST.get('sel_testers','')
-        
-    if choice3:
-#        reports = 'This is the report.'
-        selected_point = SamplingPoint.objects.filter(id = choice1)
-        sel_repo = Reporter.objects.filter(id = choice2)
-        sel_para = Parameter.objects.filter(id = choice3)
-        reports = MeasuredValue.objects.filter( sample__sampling_point=selected_point,
-                                                sample__taken_by=sel_repo,
-                                                parameter=sel_para)
-    else:
-        reports = None
-        
-    return render_to_response(req, 'samplesreport.html',{   'parameters'    : para,
-                                                            'testers'       : samples,
-                                                            'sel_points'    : choice1,
-                                                            'sel_testers'   : choice2,
-                                                            'reports'        : reports,
-                                                        })
+        form = SelectParameterForm() # An unbound form
 
-
+    return render_to_response(request,
+        "samplesreport.html", {
+        "form": form,
+        "points": ss,
+    })
 
 
 def comma(string_or_list):
@@ -131,12 +153,12 @@ def comma(string_or_list):
 def pdf_view(request):
     # Create the HttpResponse object with the appropriate PDF headers.
     response = HttpResponse(mimetype='application/pdf')
-    #    this is for makin pdf as an attachent file
+    #    this is for making PDF as an attachment file
     #    response['Content-Disposition'] = 'attachment; filename=hello.pdf'
     response['Content-Disposition'] = 'filename=hello.pdf'
     p = canvas.Canvas(response)
     # Create the PDF object, using the response object as its "file."
-
+    
     # Draw things on the PDF. Here's where the PDF generation happens.
     # See the ReportLab documentation for the full list of functionality.
     p.drawString(100, 100, "AquaTest Report!!!....on PDF!")
@@ -144,20 +166,3 @@ def pdf_view(request):
     p.showPage()
     p.save()
     return response
-
-def date_range(req):
-    pass
-
-def wqm_ares(req):
-    """
-    from wqm.models import SamplingPoint
-    """
-    ares = SamplingPoint.objects.all()
-    return ares
-
-def sample_points(req):
-    """
-    from samples.models import Sample
-    """
-    samples = Sample.objects.filter()
-    return samples

@@ -69,11 +69,22 @@ class MeasuredValue(models.Model):
 
     def __unicode__(self):
         return '%s' % (self.value)
-
+    
+    def is_abnormal(self):
+        try:
+            av = AbnormalRange.objects.get(value_rule__parameter = self.parameter)
+            min = av.maximum
+            max = av.minimum
+            if self.value in range(min, max):
+                return True
+            else:
+                return False 
+        except Exception, e:
+            return False
 
 class ValueRule(SampleDates):
     '''
-    Rules Applied to the values
+        Rules Applied to the values
     '''
     description = models.TextField()
     parameter = models.ForeignKey(Parameter, unique=True)
@@ -130,9 +141,10 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
         sample = Sample()
         now = datetime.now()
         
+        ab_list = []
+        vals = []
         # check for which form submitted and create a sample.
         # h2s test
-        vals = []
         if form_xmlns == H2S_XMLNS:
             
             point = SamplingPoint.objects.get(code = sample_data["h2s_test_assessment_pointcode"])
@@ -246,7 +258,9 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                     value.sample = sample
                     value.save()
                     vals.append(value)
+            # > AbnormalRange.objects.all() works here
         send_sms_notifications(sample,vals,form_xmlns)
+
 # Register to receive signals each time a Metadata is saved
 post_save.connect(check_and_add_sample, sender=Metadata)
 

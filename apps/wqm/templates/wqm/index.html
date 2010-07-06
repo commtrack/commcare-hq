@@ -47,6 +47,7 @@
             var point = new GLatLng(sPoint.lat, sPoint.lng);
 
             // select marker type
+            /*
             if (sPoint.lat > -29){
                 var greenIcon = new GIcon(G_DEFAULT_ICON);
                 greenIcon.image = "{{MEDIA_URL}}/hq/green_MarkerG.png";
@@ -62,7 +63,13 @@
                 // Set up our GMarkerOptions object
                 markerOptions = { icon:orangeIcon };
             }
+            */
+            var orangeIcon = new GIcon(G_DEFAULT_ICON);
+            orangeIcon.image = "{{MEDIA_URL}}/hq/green_MarkerG.png";
 
+            // Set up our GMarkerOptions object
+            markerOptions = { icon:orangeIcon };
+            
             marker = new GMarker(point,markerOptions);
             map.addOverlay(marker);
             markers[count] = marker;

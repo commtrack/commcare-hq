@@ -1,10 +1,13 @@
 from datetime import datetime
+from datetime import datetime
 import httplib, urllib
 from threading import Thread
+from xformmanager.models import FormDefModel
 
-#from samples.models import AbnormalRange # already in samples.models.py 
+from smsnotifications.models import NotificationChoice, SmsNotification
 
 def _send_sms(reporter_id, message_text):
+    print '~~~~~~~~~~~~~~~ IN _SEND_SMS ~~~~~~~~~~~~~~~'
     data = {"uid":  reporter_id,
             "text": message_text
             }
@@ -25,9 +28,10 @@ def send_sms_notifications(sub, vals, form_xmlns):
     # figure out who to send to, what to send
     print "---------------You TEXTING -----------------------"
     form = FormDefModel.objects.get(target_namespace = form_xmlns)
-    choice = NotificationChoice.objects.get(xform = form)
-    print '---------------->>>>>>>>>>>  %s  <<<<<<<<<<<------------'% (choice,)
-
+    n_choice = NotificationChoice.objects.get(xform = form)
+#    choice = NotificationChoice.objects.get(xform__id = form__id)
+    print '---------------->>>>>>>>>>>  %s  <<<<<<<<<<<------------'% (n_choice,)
+    
     reporter = sub.taken_by
     point = sub.sampling_point
     # A temporary SMS Response
@@ -43,31 +47,30 @@ def send_sms_notifications(sub, vals, form_xmlns):
     print '----------- %s -----------------'% (msg2,)
     
     # query all the notification to the submitted point. for that xform
-    notices = SmsNotification.objects.filter(sampling_point=point,notification_type=choice)
+    notices = SmsNotification.objects.filter(sampling_point=point,notification_type=n_choice)
     print '----------- %s -----------------'% (notices,)
+    
     for notice in notices:
         print '----------- %s -----------------'% (notice,)
         reporter = notice.authorised_sampler
         #check if failure notification
         if notice.failure_notification:
-            print 'A: Failure Notification----------- %s -----------------'% (notice.failure_notification,)
+            print 'A: Yes Failure Notification----------- %s -----------------'% (notice.failure_notification,)
+              
             msg3 = msg2
-            msg3 += 'Their is an abnormal range in the sample'
-            thread = Thread(target=_send_sms,args=(reporter.id, msg3 ))
-            thread.start()
-
+            ab_present = False # notifies if their is an abnormal range found
             
             for value in vals:
-                print '################ %s #############' % (value,)
-                # check if values is abnomal and append to msg3
-#                if abnormal_range(value):
-#                    test_name, test_value = abnormal_range(value)
-#                    msg3 += "%s:%s, " % (test_name, test_value)
-#                if abnormal_range(value):
-#                    print 'A: Range----------- %s -----------------'% ('True',)
-#                else:
-#                    print 'Range----------- %s -----------------'% ('False',)
-                # check if no abnormal values found dnt send a sms
+                if value.is_abnormal:
+                    ab_present = True
+                    print '^^^^^^^^^^^^^ %s ^^^^^^^^^^^^^^^' % (value,)
+                    msg3 += "%s:%s, " % (value.parameter.test_name_short, value.value)
+                else:
+                    print "just a value ```````````````"
+            # check if abnormal values found and send a sms
+            if ab_present:
+                thread = Thread(target=_send_sms,args=(reporter.id, msg3 ))
+                thread.start()
         else:
             print 'B: No failures Notification----------- %s -----------------'% (notice.failure_notification,)
             msg4 = msg2
@@ -76,3 +79,16 @@ def send_sms_notifications(sub, vals, form_xmlns):
             msg4 += '. Comment: %s'%(sub.notes)
             thread = Thread(target=_send_sms,args=(reporter.id, msg4 ))
             thread.start()
+
+#def abnormal_range(value):
+#    """
+#        Check if the value in the MeasuredValue is within abnormal range
+#        and returns True to within range and False where-else
+#    """
+#    ab_range = AbnormalRange.objects.get(value_rule__parameter = value__parameter)
+#    min = ab_range.minimum
+#    max = ab_range.maximum
+#    if value.value in range(min,max):
+#        return "True"
+#    else:
+#        return "False"

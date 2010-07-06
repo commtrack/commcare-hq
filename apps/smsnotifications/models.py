@@ -23,7 +23,7 @@ class NotificationChoice(models.Model):
         return self.choice
 
 class SmsNotification(models.Model):
-    sampling_point = models.ManyToManyField(SamplingPoint)
+    sampling_point = models.ManyToManyField(SamplingPoint, help_text="Hold down Ctrl for multiple selections")
     authorised_sampler = models.ForeignKey(Reporter)
     # TODO: Notification should be selected from the type of xforms.
     notification_type = models.ForeignKey(NotificationChoice)
