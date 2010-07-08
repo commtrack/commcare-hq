@@ -30,4 +30,7 @@ class Event(models.Model):
     def __str__(self):
         return '%s @ %s' % (self.name, self.when)
 
-
+#def abnormal_rages(sample):
+#    samplea = sample
+#    from_range = Range.objects.filter(minimum
+#    if samplea <  or >

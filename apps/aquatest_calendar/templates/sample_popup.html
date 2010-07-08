@@ -1,18 +1,23 @@
 {% load i18n %}
-<h3>Forms for {{ user }}</h3>
-<p style="text-align:right"><a href="{% url xformmanager.views.xmlns_group %}?xmlns={{ group.xmlns }}">details view</a></p>
-<!--{% with group.forms as forms %}-->
-<!--{% include "xformmanager/partials/xform_group_table.html" %}-->
-<!--{% endwith %}-->
+
+<table class="event">
+            <tr>
+              <th>Date</th>
+              <th>Sample Point</th>
+              <th>Tester</th>
+              <th>Parameters</th>
+            </tr>
+            {% for event in cal.getDailyEvents %}
+              <tr>
+                <td>{{ event.start.date }}</td>
+                <td>{{ event.desc }}</td>
+                <td>{{ event.name }}</td>
+                <td>{{event.count }}</td>
+              </tr>
+            {% endfor %}
+
+</table>
+
 <p>
 <input id="close" class="jqmClose" type="button" value="Close" style="float:right;"/>
 </p>
-<table>
-    <thead>
-        heading
-    </thead>
-    <tbody>tbody</tbody>
-    <tr>
-        table row<td>table data</td>
-    </tr>
-</table>

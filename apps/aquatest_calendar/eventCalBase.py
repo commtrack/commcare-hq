@@ -9,10 +9,10 @@ import copy
 
 class monthCalendar(object):
     """Month Calendar"""
-    def __init__(self, id, owner, year, month):
+    def __init__(self, year, month):
         if self.checkYMD(year, month, 1):
-            self.id = id
-            self.owner = owner
+#            self.id = id
+#            self.owner = owner
             self.year = year
             self.month = month
             self.calendar = calendar.monthcalendar(year, month)
@@ -69,6 +69,7 @@ class monthCalendar(object):
             # finally, sort events for 'day'
             self.events[day].sort()
 
+
     def delEvent(self, day, time):
         """Delete event(s).  Return a list of event(s) deleted"""
         result = self.getEvents(day, time)
@@ -88,6 +89,7 @@ class event(object):
             self.id = id
             self.name = name
             self.desc = desc
+            self.total = None
             self.start = self.adjustDatetime(start)
         else:
             raise ValueError, '%s.  Expected datetime object' % start

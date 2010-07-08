@@ -52,6 +52,7 @@ from reporters.views import message, check_reporter_form, update_reporter
 from reporters.models import Reporter, PersistantBackend, PersistantConnection
 from locations.models import Location, LocationType
 from wqm.models import WqmAuthority
+from calender.utils import *
 from samples.models import *
 import time
 ####################################
@@ -79,42 +80,42 @@ def view(request):
     default = dict(month=date.month, year=date.year, day=1, rowid=1,
             name="", desc="", when="")
     url = request.path
-
     p = getParams(request, default)
     year, month, day = p['year'], p['month'], p['day']
 #    samples = today_samples_data(day,month,year)
 
     search_string = request.REQUEST.get("q","")
-    print '###################'
     samples = []
     if search_string == "":
-        for i in range(calendar.monthrange(year,month)[0],calendar.monthrange(year,month)[1]+1):
+        for i in range(1,calendar.monthrange(year,month)[1]):
     #        dat = datetime.date(year,month,i)
     #    print dat
             day_sample = today_samples_data(datetime.date(year,month,i))
     #        print '%s' % day_sample
 
             samples.append(day_sample)
+    
     else:
         area = WqmArea.objects.get(id = search_string)
         search_string = area
-        for i in range(calendar.monthrange(year,month)[0],calendar.monthrange(year,month)[1]+1):
+        for i in range(1,calendar.monthrange(year,month)[1]):
             day_sample = today_samples_data_area(datetime.date(year,month,i),area)
             samples.append(day_sample)
 #    for i in samples:
 #        print '%s'% samples
 #    print 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
 #    print samples[2]
-        
+#    print samples
     # create calendar obj
 
 
     areas = WqmArea.objects.all()
-    cal = CalendarController(user, day)
+    cal = CalendarController(day)
     cal.load(year, month)
     template_name="calendar.html"
     context = {}
     dict(username=user, cal=cal, url=url)
+    i = 0
     context = {
         "username":user,
         "cal":cal,
@@ -122,6 +123,7 @@ def view(request):
         'samples':samples,
         "areas":areas,
         "search_string":search_string,
+        'i':i
     }
     return render_to_response(request, template_name, context)
 
@@ -149,9 +151,9 @@ def get_normality(day):
     return normality
 
 def today_samples_data(today):
-    a = Sample.objects.filter(  date_received__day = today.day,
-                                    date_received__month = today.month,
-                                    date_received__year = today.year)
+    a = Sample.objects.filter(      date_taken__day = today.day,
+                                    date_taken__month = today.month,
+                                    date_taken__year = today.year)
     return a.count()
 def today_samples_data_area(today, area):
     a = Sample.objects.filter(  date_received__day = today.day,
@@ -168,7 +170,7 @@ def addEvent(request):
     year, month, day = p['year'], p['month'], p['day']
 
     # create calendar obj
-    cal = CalendarController(user, day)
+    cal = CalendarController(day)
     cal.load(year, month)
 
     # parpare data for adding Event
@@ -191,7 +193,7 @@ def delEvent(request):
     year, month, day = p['year'], p['month'], p['day']
 
     # create calendar obj
-    cal = CalendarController(user, day)
+    cal = CalendarController(day)
     cal.load(year, month)
 
     # delete Event
@@ -209,7 +211,7 @@ def updEvent(request):
     year, month, day = p['year'], p['month'], p['day']
 
     # create calendar obj
-    cal = CalendarController(user, day)
+    cal = CalendarController(day)
     cal.load(year, month)
 
     # parpare data for adding Event
@@ -276,3 +278,72 @@ def sample_popup(request):
                               {"user": user})
 
 
+
+@login_and_domain_required
+def new(request):
+
+    template_name="calendarnew.html"
+    context = {}
+
+    context = {
+
+    }
+    return render_to_response(request, template_name, context)
+
+@login_and_domain_required
+def samples_popup(request):
+    """Popup (compact) view a group of samples for a particular day.
+    """
+
+    user = request.user
+    date = datetime.datetime.now()
+    default = dict(month=date.month, year=date.year, day=1, rowid=1,
+            name="", desc="", when="")
+    url = request.path
+    p = getParams(request, default)
+    year, month, day = p['year'], p['month'], p['day']
+#    samples = today_samples_data(day,month,year)
+
+    search_string = request.REQUEST.get("q","")
+    samples = []
+    if search_string == "":
+        for i in range(1,calendar.monthrange(year,month)[1]):
+    #        dat = datetime.date(year,month,i)
+    #    print dat
+            day_sample = today_samples_data(datetime.date(year,month,i))
+    #        print '%s' % day_sample
+
+            samples.append(day_sample)
+    
+    else:
+        area = WqmArea.objects.get(id = search_string)
+        search_string = area
+        for i in range(1,calendar.monthrange(year,month)[1]):
+            day_sample = today_samples_data_area(datetime.date(year,month,i),area)
+            samples.append(day_sample)
+#    for i in samples:
+#        print '%s'% samples
+#    print 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+#    print samples[2]
+    print samples
+    # create calendar obj
+
+
+    areas = WqmArea.objects.all()
+    cal = CalendarController(day)
+    cal.load(year, month)
+    template_name="sample_popup.html"
+    context = {}
+    dict(username=user, cal=cal, url=url)
+    i = 0
+    context = {
+        "username":user,
+        "cal":cal,
+        "url":url,
+        'samples':samples,
+        "areas":areas,
+        "search_string":search_string,
+        'i':i
+    }
+
+    return render_to_response(request, template_name,context)

@@ -1,8 +1,9 @@
-import datetime
-import calendar
+import datetime, calendar
 
-import models
+import aquatest_calendar.models
 import eventCalBase
+from aquatest_calendar.models import *
+from samples.models import *
 
 #
 # TODO - should have used id to identify event, not rowid
@@ -10,10 +11,10 @@ import eventCalBase
 
 class CalendarController(object):
     """Controller object for calendar"""
-    def __init__(self, owner, day=1):
+    def __init__(self, day=1):
         """owner - owner of this calendar, day - day to shown"""
         calendar.setfirstweekday(calendar.SUNDAY)
-        self.owner = owner
+#        self.owner = owner
         self.day = day
         self.curr = None
         self.db_cal = None
@@ -22,21 +23,33 @@ class CalendarController(object):
     ## database related operation (i.e. operation will sync with DB
     def load(self, year, month):
         """load calendar with data from database"""
-        temp = models.EventCalendar.objects.filter(owner=self.owner, 
-                year=year, month=month)
+#        temp = EventCalendar.objects.filter(year=year, month=month)
+        temp = Sample.objects.filter(date_taken__year=year, date_taken__month=month)
         if temp:    # either 1 record or no record , check models.py
+#            print '===============print temp============================'
+#            print temp
+#            print '==========================================='
             self.db_cal = temp[0]
-            self.db_events = models.Event.objects.filter(cal=self.db_cal,
-                    when__year=year, when__month=month)
-
-            self.curr = eventCalBase.monthCalendar(self.db_cal.id, 
-                    self.owner, year, month)
+#            print '===================self.dbcal========================'
+#            print self.db_cal
+#            print '==========================================='
+#            self.db_events = Event.objects.filter(cal=self.db_cal,
+#                    when__year=year, when__month=month)
+            self.db_events = Sample.objects.filter(date_taken__year=year, date_taken__month=month)
+#            print '===================print self.db_events========================'
+#            print self.db_events
+#            print '==========================================='
+            self.curr = eventCalBase.monthCalendar(year, month)
+#put events to map a month
             for db_e in self.db_events:
-                e = eventCalBase.event(db_e.id, db_e.name, db_e.when,
-                        db_e.desc)
-                self.curr.addEvent(e, db_e.when.day)
+#                print '===================print db_e========================'
+#                print db_e
+#                print '==========================================='
+                
+                e = eventCalBase.event(db_e.id, db_e.taken_by,db_e.date_taken, db_e.sampling_point)
+                self.curr.addEvent(e, db_e.date_taken.day)
         else:
-            self.curr = eventCalBase.monthCalendar(None, self.owner, 
+            self.curr = eventCalBase.monthCalendar(None,
                     year, month)
 
     def save(self):
@@ -45,8 +58,7 @@ class CalendarController(object):
         #  i.e. not tested.
 
         # insert or update EventCalendar
-        db_c = models.EventCalendar(owner=self.curr.owner,
-                year=self.curr.year, month=self.curr.month)
+        db_c = models.EventCalendar(year=self.curr.year, month=self.curr.month)
         db_c.id = sself.curr.id
         db_c.save()
 
@@ -63,10 +75,9 @@ class CalendarController(object):
         if not self.db_cal:
             # we are adding event to a month where no event exist, hence
             # finally we need a EventCalendar record for the month in database
-            self.db_cal = models.EventCalendar(owner=self.curr.owner,
-                year=self.curr.year, month=self.curr.month)
+            self.db_cal = EventCalendar(year=self.curr.year, month=self.curr.month)
             self.db_cal.save()
-        db_e = models.Event(name=name, when=when, desc=desc, cal=self.db_cal)
+        db_e = Event(name=name, when=when, desc=desc, cal=self.db_cal)
         db_e.save()
 
         # should have check the return above
@@ -132,27 +143,34 @@ class CalendarController(object):
     def getMonthHeader(self):
         """return a tuple that contains abbv. month name and 4 digit year"""
         return self.curr.getDate(1).strftime("%b"), self.curr.year
-
+#############################################
+#the magic happens here
+#
+#
     def getMonthCalendar(self):
         """return a matrix similar to calendar.monthCalendar().  Except
-           the element is replaced by (day, event exist)"""
+           the element is replaced by (day, event exist,count)"""
         res = []
         for dayline in calendar.monthcalendar(self.curr.year, self.curr.month):
             res_line = []
             for day in dayline:
                 data = False
+                total = 0
+                abnormal = 0
                 if day in self.curr.events:
                     data = True
-                res_line.append((day, data))
+                    a = Sample.objects.filter(date_taken__day = day,
+                                            date_taken__month = self.curr.month,
+                                            date_taken__year = self.curr.year)
+                    total = a.count()
+##
+#Write a function here that assign number to abnormal due to being in abnormal range
+#
+##
+                    abnormal = 1
+                res_line.append((day, data, total,abnormal))
             res.append(res_line)
         return res
-#    def get_samples_count(self,day):
-#        today = day
-#        query = Sample.objects.filter(  date_received__day = today.day,
-#                                    date_received__month = today.month,
-#                                    date_received__year = today.year)
-#        count = query.count()
-#        return count
         
     def getDailyEvents(self):
         """return list of events for the day"""
@@ -172,3 +190,4 @@ class CalendarController(object):
             result = 'rd'
         return result
 
+#temp = Sample.objects.filter(date_taken__year=year, date_taken__month=month)
