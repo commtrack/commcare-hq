@@ -23,29 +23,14 @@ class CalendarController(object):
     ## database related operation (i.e. operation will sync with DB
     def load(self, year, month):
         """load calendar with data from database"""
-#        temp = EventCalendar.objects.filter(year=year, month=month)
         temp = Sample.objects.filter(date_taken__year=year, date_taken__month=month)
         if temp:    # either 1 record or no record , check models.py
-#            print '===============print temp============================'
-#            print temp
-#            print '==========================================='
+
             self.db_cal = temp[0]
-#            print '===================self.dbcal========================'
-#            print self.db_cal
-#            print '==========================================='
-#            self.db_events = Event.objects.filter(cal=self.db_cal,
-#                    when__year=year, when__month=month)
             self.db_events = Sample.objects.filter(date_taken__year=year, date_taken__month=month)
-#            print '===================print self.db_events========================'
-#            print self.db_events
-#            print '==========================================='
             self.curr = eventCalBase.monthCalendar(year, month)
 #put events to map a month
-            for db_e in self.db_events:
-#                print '===================print db_e========================'
-#                print db_e
-#                print '==========================================='
-                
+            for db_e in self.db_events:              
                 e = eventCalBase.event(db_e.id, db_e.taken_by,db_e.date_taken, db_e.sampling_point)
                 self.curr.addEvent(e, db_e.date_taken.day)
         else:
@@ -165,7 +150,7 @@ class CalendarController(object):
                     total = a.count()
 ##
 #Write a function here that assign number to abnormal due to being in abnormal range
-#
+#wait for abnormal range fixing issue
 ##
                     abnormal = 1
                 res_line.append((day, data, total,abnormal))
