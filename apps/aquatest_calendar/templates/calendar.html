@@ -4,55 +4,16 @@
 {% load wqm-tags %}
 {% block javascripts %}
 
-    <script type="text/javascript" src="{{MEDIA_URL}}/hq/javascripts/jquery.js"></script>
-    <script type="text/javascript" src="{{MEDIA_URL}}/hq/javascripts/jqModal.js"></script>
-    <script type="text/javascript" src="{{MEDIA_URL}}/hq/javascripts/jqDnR.js"></script>
-    <script type="javascript>">
-$().ready(function() {
-  $('#dialog').jqm();
-});
-</script>
-    <!--<script type="text/javascript" src="{{MEDIA_URL}}/aquatest_calendar/javascripts/show_samples.js"></script>-->
+    <script type="text/javascript" src="{{MEDIA_URL}}/aquatest_calendar/javascripts/jquery.js"></script>
+
+    <script type="text/javascript" src="{{MEDIA_URL}}/aquatest_calendar/javascripts/jqModal.js"></script>
+    <script type="text/javascript" src="{{MEDIA_URL}}/aquatest_calendar/javascripts/show_samples.js"></script>
 {% endblock %}
 {% block page_stylesheets %}
+<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}/hq/stylesheets/modal_dialog.css" />
   <link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}/hq/stylesheets/aqua_calendar.css" />
-    <link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}/hq/stylesheets/modal_dialog.css" />
-    <style type="text/css">
-        /* jqModal base Styling courtesy of;
-  Brice Burgess <bhb@iceburg.net> */
-
-/* The Window's CSS z-index value is respected (takes priority). If none is supplied,
-  the Window's z-index value will be set to 3000 by default (in jqModal.js). You
-  can change this value by either;
-    a) supplying one via CSS
-    b) passing the "zIndex" parameter. E.g.  (window).jqm({zIndex: 500}); */
-
-.jqmWindow {
-    display: none;
-
-    position: fixed;
-    top: 17%;
-    left: 50%;
-
-    margin-left: -300px;
-    width: 600px;
-
-    background-color: #EEE;
-    color: #333;
-    border: 1px solid black;
-    padding: 12px;
-}
-
-.jqmOverlay { background-color: #000; }
-
-/* Fixed posistioning emulation for IE6
-     Star selector used to hide definition from browsers other than IE6
-     For valid CSS, use a conditional include instead */
-* html .jqmWindow {
-     position: absolute;
-     top: expression((document.documentElement.scrollTop || document.body.scrollTop) + Math.round(17 * (document.documentElement.offsetHeight || document.body.clientHeight) / 100) + 'px');
-}
-    </style>
+   <!--<link rel="stylesheet" type="text/css" href="{{MEDIA_URL}}/aquatest_calendar/stylesheets/popupstyle.css" />-->
+    <!--<link type="text/css" rel="stylesheet" href="{{MEDIA_URL}}/hq/stylesheets/modal_dialog.css" />-->
 {% endblock %}
 
 {% block title %}{% trans "Reports by Calender" %}{% endblock %}
@@ -80,29 +41,6 @@ $().ready(function() {
     <tr>-->
       <!--<td>-->
         <table class="calendar">
-            <button onclick="$('#dialog').jqmShow();">show</button>
-            <a href="#" class="jqModal">view</a>
-            <div class="formtrigger js_link" onclick="$('#dialog').jqmShow();"> Show upppp</div>
-...
-
-<div class="jqmWindow" id="dialog">
-
-<a href="#" class="jqmClose">Close</a>
-<hr>
-<em>READ ME</em> -->
-This is a "vanilla plain" jqModal window. Behavior and appeareance extend far beyond this.
-The demonstrations on this page will show off a few possibilites. I recommend walking
-through each one to get an understanding of jqModal <em>before</em> using it.
-
-<br /><br />
-You can view the sourcecode of examples by clicking the Javascript, CSS, and HTML tabs.
-Be sure to checkout the <a href="README">documentation</a> too!
-
-<br /><br />
-<em>NOTE</em>; You can close windows by clicking the tinted background known as the "overlay".
-Clicking the overlay will have no effect if the "modal" parameter is passed, or if the
-overlay is disabled.
-</div>
 
           <tr>
             <th><a href="?year={{ cal.prev.0 }}&month={{ cal.prev.1 }}&q={{ search_string.id }}">&laquo;</a></th>
@@ -122,8 +60,20 @@ overlay is disabled.
                 {% if day.1 %}
                     <div id="dt{{ day.0 }}" class="abnormal{{ day.3 }}" > <div id="ct{{ date.0 }}" >
                     {{ day.0 }}
+                    <center> 
+                    <div class="formtrigger js_link" onclick="show_samples('{{ cal.next.0 }}', '{{ cal.next.1 }}', '{{ day.0 }}', '#formlist');">
+                            {{ day.2 }}
+                            {% ifequal day.2 1 %}
+                                : Sample
+                            {% endifequal %}
+                            {% ifnotequal day.2 1 %}
+                                : Samples
+                            {% endifnotequal %}
 
-                        <div class="formtrigger js_link" onclick="show_forms('#samplelist');">{{ day.2 }} : Samples</div>
+
+
+                    </div>
+                    </center>
                 {% else %}
                     {% if day.0 %}
                         {{ day.0 }}
@@ -139,10 +89,33 @@ overlay is disabled.
           </tr>
           {% endfor %}
         </table>
-<!--  </tr>
-  </table>-->
+
+<!--<a href="#" class="jqModal">view</a>
+...
+<div class="jqmWindow" id="dialog">-->
+
+<!--<a href="#" class="jqmClose">Close</a>
+
+
+ <table class="event">
+                                <tr>
+                                  <th>Date</th>
+                                  <th>Sample Point</th>
+                                  <th>Tester</th>
+                                  <th>Parameters</th>
+                                </tr>
+
+                                    <tr>
+                                    <td> a</td>
+                                    <td> b</td>
+                                    <td> c</td>
+                                    <td>d</td>
+                                    </tr>
+
+                            </table>
+</div>-->
+
 <div class="modal_dialog" id="formlist">
 Hello World
 </div>
-
 {% endblock %}

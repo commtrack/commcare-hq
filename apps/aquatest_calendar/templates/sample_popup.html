@@ -1,23 +1,37 @@
 {% load i18n %}
 
-<table class="event">
+<p>
+<input id="close" class="jqmClose" type="button" value="Close" style="float:right;"/>
+</p>
+<div>
+    <center>{{ date }}</center><br>
+    {{ count }}
+                            {% ifequal count 1 %}
+                               : Sample
+                            {% endifequal %}
+                            {% ifnotequal count 1 %}
+                               : Samples
+                            {% endifnotequal %}
+
+
+
+</div>
+<table class="event" style="border: solid blue 1px;">
+             
             <tr>
               <th>Date</th>
               <th>Sample Point</th>
               <th>Tester</th>
               <th>Parameters</th>
             </tr>
-            {% for event in cal.getDailyEvents %}
-              <tr>
-                <td>{{ event.start.date }}</td>
-                <td>{{ event.desc }}</td>
-                <td>{{ event.name }}</td>
-                <td>{{event.count }}</td>
-              </tr>
-            {% endfor %}
+            {% for sample in samples%}
+                  <tr>
+                  <td>{{ sample.date_taken.date}}</td>
+                  <td>{{ sample.sampling_point}}</td>
+                  <td>{{ sample.taken_by}}</td>
+                  <td>clorine 3.5</td>
+                  </tr>
+             {% endfor %}
 
 </table>
 
-<p>
-<input id="close" class="jqmClose" type="button" value="Close" style="float:right;"/>
-</p>
