@@ -22,7 +22,7 @@
 <h2>{%trans "Report by Calender"%}</h2>
 
     <h3>{% ifequal area 0 %}Samples in all Areas{% endifequal %}
-        {% ifnotequal area 0 %}Samples in {% for name in location_name %}{{ name }}, {% endfor %}{% endifnotequal %}
+        {% ifnotequal area 0 %}Samples in {% for name in location_name %}{{ name }} {% endfor %}{% endifnotequal %}
 
 
 
