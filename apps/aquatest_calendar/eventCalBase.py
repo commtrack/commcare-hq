@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import calendar, datetime
 import copy
 
@@ -9,10 +7,10 @@ import copy
 
 class monthCalendar(object):
     """Month Calendar"""
-    def __init__(self, year, month):
+    def __init__(self, owner, year, month):
         if self.checkYMD(year, month, 1):
 #            self.id = id
-#            self.owner = owner
+            self.owner = owner
             self.year = year
             self.month = month
             self.calendar = calendar.monthcalendar(year, month)
@@ -68,20 +66,9 @@ class monthCalendar(object):
                     datetime.datetime.combine(date, nevent.getStart().time()))
             # finally, sort events for 'day'
             self.events[day].sort()
-
-
-    def delEvent(self, day, time):
-        """Delete event(s).  Return a list of event(s) deleted"""
-        result = self.getEvents(day, time)
-        for e in result:
-            self.events[day].remove(e)
-        if not self.events[day]:
-            del self.events[day]
-        return result
-
         
 class event(object):
-    """A Event object that is time aware.  Time resolution of event is
+    """A Event object that is time aware,area and total count.  Time resolution of event is
         up to second."""
     def __init__(self, id, name, start=datetime.datetime.now(), desc=''):
         """defailt date is now()"""
@@ -90,6 +77,7 @@ class event(object):
             self.name = name
             self.desc = desc
             self.total = None
+            self.area = None
             self.start = self.adjustDatetime(start)
         else:
             raise ValueError, '%s.  Expected datetime object' % start

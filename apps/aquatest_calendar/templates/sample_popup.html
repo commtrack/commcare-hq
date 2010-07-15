@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load calendar-tags %}
 
 <p>
 <input id="close" class="jqmClose" type="button" value="Close" style="float:right;"/>
@@ -16,22 +17,5 @@
 
 
 </div>
-<table class="event" style="border: solid blue 1px;">
-             
-            <tr>
-              <th>Date</th>
-              <th>Sample Point</th>
-              <th>Tester</th>
-              <th>Parameters</th>
-            </tr>
-            {% for sample in samples%}
-                  <tr>
-                  <td>{{ sample.date_taken.date}}</td>
-                  <td>{{ sample.sampling_point}}</td>
-                  <td>{{ sample.taken_by}}</td>
-                  <td>clorine 3.5</td>
-                  </tr>
-             {% endfor %}
-
-</table>
+{% get_samples day month year area %}
 
