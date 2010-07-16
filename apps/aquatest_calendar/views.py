@@ -6,7 +6,6 @@ from graphing.models import *
 from receiver.models import *
 from domain.decorators import login_and_domain_required
 from reporters.utils import *
-from calender.utils import *
 from samples.models import *
 import datetime, calendar
 import copy

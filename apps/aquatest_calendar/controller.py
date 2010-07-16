@@ -1,5 +1,6 @@
 import eventCalBase
 from samples.models import *
+import calendar
 
 #
 # TODO - should have used id to identify event, not rowid
