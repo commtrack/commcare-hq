@@ -37,6 +37,7 @@ import hq.utils as utils
 import hq.reporter as reporter
 import hq.reporter.custom as custom
 import hq.reporter.metastats as metastats
+from hq.models import ReporterProfile
 
 import hq.reporter.inspector as repinspector
 import hq.reporter.metadata as metadata
@@ -47,6 +48,7 @@ from domain.decorators import login_and_domain_required
 #from reporters.models import Reporter, PersistantBackend, PersistantConnection
 #from locations.models import Location, LocationType
 from wqm.models import WqmAuthority
+from samples.models import Sample
 
 logger_set = False
 
@@ -54,21 +56,33 @@ logger_set = False
 @login_and_domain_required
 def samples(req):
     template_name = 'samples.html'
-    context = {}
+    testers = get_tester(req.user)
     districts = WqmAuthority.objects.all()
+
     
-    query = WqmAuthority.objects
+    query = Sample.objects.filter(taken_by__in=testers)
     search_string = req.REQUEST.get("q", "")
     if search_string == "":
-        query = query.all()
-
+        query = query.filter(sampling_point__wqmarea__wqmauthority__in = districts)
     else:
-        query = query.filter(id = search_string)
-        search_string = query
-    
+        query = query.filter(sampling_point__wqmarea__wqmauthority__in = search_string)
+        search_string = WqmAuthority.objects.filter(id = search_string) 
     return render_to_response(req, template_name,
                               { 
                               "sort_districts" : districts,
-                              "districts" : query,
+                              "districts" : districts,
+                              "samples": paginated(req, query),
                               "search_string" : search_string,
                               })
+
+def get_tester(user):
+    # todo: get the testers in the system with the same
+    # domain as the login user.
+    rep_profile = ReporterProfile.objects.filter(domain=user.selected_domain)
+    reporters = []
+
+    if rep_profile:
+        for rep in rep_profile:
+            reporter = rep.reporter
+            reporters.append(reporter)
+    return reporters

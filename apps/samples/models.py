@@ -46,7 +46,7 @@ class Sample(SampleDates):
     taken_by = models.ForeignKey(Reporter)
     sampling_point = models.ForeignKey(SamplingPoint)
     notes = models.CharField(max_length=250, null=True, blank=True)
-    batch_number = models.CharField(max_length=100)
+    batch_number = models.CharField(max_length=100, null=True, blank=True)
     # some_field to check if this sample is new o not.
     incubated = models.BooleanField(default=False)
     date_taken = models.DateTimeField()
@@ -131,7 +131,6 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
    """
     # only process newly created forms, not all of them
     if not created:        return
-    
     # check the form type to see if it is a new sample
     form_xmlns = instance.formdefmodel.target_namespace
     
@@ -202,14 +201,13 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
             
         # physical chemical test
         if form_xmlns == PHYSCHEM_XMLNS:
-            
             point = SamplingPoint.objects.get(code = sample_data["physchem_test_assessment_pointcode"])
             sample.sampling_point = point
             sample.date_taken = sample_data["physchem_test_assessment_assessmentdate"]
             sample.notes = sample_data["physchem_test_datacapture_comments"]
             sample.date_received = now
             sample.created = now
-
+            print "--- checking and adding a sample ---"
             alias = sample_data["physchem_test_datacapture_enteredby"]
             try:
                 reporter = Reporter.objects.get(alias__iexact = alias)
@@ -248,7 +246,6 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
             for some in tests:
                 if sample_data.get(some) != None:
                     para_id = tests.index(some)
-                    
                     # this test is present in the xform, hence store it's value.
                     value = MeasuredValue()
                     value.value = sample_data[some]
@@ -257,8 +254,7 @@ def check_and_add_sample(sender, instance, created, **kwargs): #get sender, inst
                     value.parameter = Parameter.objects.get(id = para_id)
                     value.sample = sample
                     value.save()
-                    vals.append(value)
-            # > AbnormalRange.objects.all() works here
+                    vals.append(value)            
         send_sms_notifications(sample,vals,form_xmlns)
 
 # Register to receive signals each time a Metadata is saved

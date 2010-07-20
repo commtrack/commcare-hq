@@ -1,6 +1,7 @@
 {% extends "hq/base.html" %}
 {% load i18n %}
 {% load samples_tags %}
+{% load pagination-tags %}
 
 {% block title %}{% trans "Samples" %}{% endblock %}
 {% block javascripts %}
@@ -34,6 +35,37 @@
     <input type="submit" value="Filter"/>
 </form>
 
-{% get_samples user districts %}
+	<table>
+		<thead>
+			<tr>
+	            <th>Sampling point (Area)</th>
+	            <th>Taken by</th>
+	            <th>Date Taken</th>
+	            <th>Date Received</th>
+	            <th>Results</th>
+	       	</tr>
+	    </thead>
+	 	<tbody>
+	 		{% for sample in samples.object_list %}
+	 		<tr class="{% cycle 'even' 'odd' %}">
+	 			<td>{{ sample.sampling_point }} ({{ sample.sampling_point.wqmarea}})</td>
+	 			<td>{{sample.taken_by}}</td>
+	 			<td>{{sample.date_taken}}</td>
+	 			<td>{{sample.date_received}}</td>
+	 			
+	 				{% m_values sample %}
+	 			
+	 		</tr>
+	 		{% endfor %}
+	 	</tbody>   
+	 	<tfoot>
+			<tr>
+				<td colspan="5">
+					{% paginator samples %}
+				</td>
+			</tr>
+		</tfoot>
+	 	
+	 </table>
 
 {% endblock %}

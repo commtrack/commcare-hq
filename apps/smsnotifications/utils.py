@@ -29,7 +29,6 @@ def send_sms_notifications(sub, vals, form_xmlns):
     print "---------------You TEXTING -----------------------"
     form = FormDefModel.objects.get(target_namespace = form_xmlns)
     n_choice = NotificationChoice.objects.get(xform = form)
-#    choice = NotificationChoice.objects.get(xform__id = form__id)
     print '---------------->>>>>>>>>>>  %s  <<<<<<<<<<<------------'% (n_choice,)
     
     reporter = sub.taken_by

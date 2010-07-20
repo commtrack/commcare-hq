@@ -19,7 +19,9 @@ geomodeladmin =  GeoModelAdmin(SamplingPoint, google_admin)
 db_field = SamplingPoint._meta.get_field('point')
  
 class SamplingPointForm(ModelForm):
-    point = CharField(widget=geomodeladmin.get_map_widget(db_field))
+    point = forms.CharField(widget=geomodeladmin.get_map_widget(db_field))
+#    point = forms.PointField(widget=forms.PointWidget())
+
     
     class Meta:
         model = SamplingPoint

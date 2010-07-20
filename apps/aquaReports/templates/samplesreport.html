@@ -28,12 +28,7 @@
         <a href="/aquareports" class="add">Create a new report</a>
         {% endif %}
     </div>
-        {% if reports %}
-            <h1> Sampling Activity Report </h1>            
-            {% for report in reports%}
-            {{ report.value }} {{ report.parameter}}
-            {% endfor %}
-        {% else %}
+        
         <div class="span-12" style="margin-left:auto; margin-right:auto; float:none">
         <form class="sfb clear" method="post" action="#" method="POST">
 			{% for field in form %}
@@ -55,8 +50,6 @@
 		    </p>
 		</form>
 	</div>        
-        {% endif %}
-
 
 <!--  </div> -->
 
