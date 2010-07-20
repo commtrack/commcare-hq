@@ -1,18 +1,21 @@
 {% load i18n %}
-<h3>Forms for {{ user }}</h3>
-<p style="text-align:right"><a href="{% url xformmanager.views.xmlns_group %}?xmlns={{ group.xmlns }}">details view</a></p>
-<!--{% with group.forms as forms %}-->
-<!--{% include "xformmanager/partials/xform_group_table.html" %}-->
-<!--{% endwith %}-->
+{% load calendar-tags %}
+
 <p>
 <input id="close" class="jqmClose" type="button" value="Close" style="float:right;"/>
 </p>
-<table>
-    <thead>
-        heading
-    </thead>
-    <tbody>tbody</tbody>
-    <tr>
-        table row<td>table data</td>
-    </tr>
-</table>
+<div>
+    <center>{{ date }}</center><br>
+    {{ count }}
+                            {% ifequal count 1 %}
+                               : Sample
+                            {% endifequal %}
+                            {% ifnotequal count 1 %}
+                               : Samples
+                            {% endifnotequal %}
+
+
+
+</div>
+{% get_samples day month year area %}
+

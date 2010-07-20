@@ -1,7 +1,10 @@
 from django.conf.urls.defaults import *
 
-urlpatterns = patterns('',
-    (r'^calender$', 'aquatest_calendar.views.view'),
-    (r'^sample_popup$', 'aquatest_calendar.views.sample_popup'),
+## calendar view
+urlpatterns = patterns('aquatest_calendar.views',
+    (r'^calender$', 'view'),
+    (r'^samplepop/$', 'samples_pop'),
+
 )
+
 
