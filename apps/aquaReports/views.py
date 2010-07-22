@@ -66,7 +66,7 @@ def index(req):
                                             parameter__in = selected_parameters)
     reports = reports.filter(sample__taken_by__in = selected_reporters)
     return render_to_response(req,
-        "aquareports.html", {
+        "samplesreport.html", {
         "reports": reports,
         "samplingpoints" :selected_point,
         "testers": selected_reporters,
@@ -118,6 +118,7 @@ def samplesreport_testers(request):
     return render_to_response(request,
         "samplesreport.html", {
         "form": form,
+        "points": ss,
     })
 
 
@@ -136,6 +137,7 @@ def samplesreport_parameters(request):
     return render_to_response(request,
         "samplesreport.html", {
         "form": form,
+        "points": ss,
     })
 
 
@@ -164,3 +166,4 @@ def pdf_view(request):
     p.showPage()
     p.save()
     return response
+>>>>>>> 80124007d770651c58787a9d7f5167fd8314d990
